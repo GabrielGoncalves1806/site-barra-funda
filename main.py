@@ -1,6 +1,9 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
+import shutil
+import uuid
 
-from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi import FastAPI, Request, Depends, HTTPException, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
@@ -16,9 +19,17 @@ from models import (
 )
 
 
+UPLOAD_DIR = Path("static/uploads")
+
+
+def ensure_upload_dir():
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_db_and_tables()
+    ensure_upload_dir()
     yield
 
 
@@ -129,6 +140,7 @@ def delete_sale(sale_id: int, session: Session = Depends(get_session)):
     sale = session.get(Sale, sale_id)
     if not sale:
         raise HTTPException(404, "Produto não encontrado")
+    remove_uploaded_file(sale.image)
     session.delete(sale)
     session.commit()
     return {"ok": True}
@@ -167,6 +179,7 @@ def delete_area(area_id: int, session: Session = Depends(get_session)):
     area = session.get(Area, area_id)
     if not area:
         raise HTTPException(404, "Área não encontrada")
+    remove_uploaded_file(area.image)
     session.delete(area)
     session.commit()
     return {"ok": True}
@@ -208,6 +221,36 @@ def delete_faq(faq_id: int, session: Session = Depends(get_session)):
     session.delete(faq)
     session.commit()
     return {"ok": True}
+
+
+# ── Upload de arquivos ───────────────────────────────────
+def save_upload_file(upload: UploadFile) -> str:
+    ensure_upload_dir()
+    extension = Path(upload.filename or "").suffix.lower()
+    filename = f"{uuid.uuid4().hex}{extension}"
+    destination = UPLOAD_DIR / filename
+    with destination.open("wb") as buffer:
+        shutil.copyfileobj(upload.file, buffer)
+    return f"/static/uploads/{filename}"
+
+
+def remove_uploaded_file(url: str | None):
+    if not url or not url.startswith("/static/uploads/"):
+        return
+    file_path = Path(url.lstrip("/"))
+    try:
+        if file_path.exists():
+            file_path.unlink()
+    except OSError:
+        pass
+
+
+@app.post("/api/upload")
+async def upload_file(file: UploadFile = File(...)):
+    if not file.filename:
+        raise HTTPException(400, "Arquivo inválido")
+    url = save_upload_file(file)
+    return {"url": url}
 
 
 # ── Auth simples (verificação de senha) ──────────────────

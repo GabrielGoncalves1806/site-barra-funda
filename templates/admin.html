@@ -367,8 +367,10 @@
               <input type="text" id="saleSeller" required placeholder="Ex: Maria - Bloco A, Apto 102" />
             </div>
             <div class="form-group">
-              <label>URL da Imagem</label>
-              <input type="text" id="saleImage" placeholder="Ex: /static/assets/sales/bolo.jpg" />
+              <label>Imagem do Produto</label>
+              <input type="hidden" id="saleImageUrl" value="/static/assets/placeholder-sale.jpg" />
+              <input type="file" id="saleImageFile" accept="image/*" />
+              <small id="saleImageStatus" class="muted">Selecione uma imagem para enviar.</small>
             </div>
           </div>
           <div class="btn-row">
@@ -403,8 +405,10 @@
               <input type="text" id="areaTag" placeholder="Ex: Uso livre 24h" />
             </div>
             <div class="form-group">
-              <label>URL da Imagem</label>
-              <input type="text" id="areaImage" placeholder="Ex: /static/assets/area-academia.jpg" />
+              <label>Imagem da Área</label>
+              <input type="hidden" id="areaImageUrl" />
+              <input type="file" id="areaImageFile" accept="image/*" />
+              <small id="areaImageStatus" class="muted">Envie uma imagem representativa.</small>
             </div>
           </div>
           <div class="form-group">
@@ -545,6 +549,23 @@
       });
     });
 
+    async function uploadImage(fileInput, hiddenInput, statusEl) {
+      const file = fileInput.files?.[0];
+      if (!file) return hiddenInput.value;
+      statusEl.textContent = 'Enviando imagem...';
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      if (!res.ok) {
+        statusEl.textContent = 'Falha ao enviar imagem.';
+        throw new Error('Upload falhou');
+      }
+      const data = await res.json();
+      hiddenInput.value = data.url;
+      statusEl.textContent = 'Imagem enviada com sucesso!';
+      return data.url;
+    }
+
     async function loadData() {
       try {
         const [noticesRes, salesRes, areasRes, faqsRes] = await Promise.all([
@@ -633,13 +654,23 @@
 
     document.getElementById('saleForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const imageInput = document.getElementById('saleImageUrl');
+      const fileInput = document.getElementById('saleImageFile');
+      const statusEl = document.getElementById('saleImageStatus');
+      if (fileInput.files?.length) {
+        try {
+          await uploadImage(fileInput, imageInput, statusEl);
+        } catch {
+          return;
+        }
+      }
       const payload = {
         title: document.getElementById('saleTitle').value,
         description: document.getElementById('saleDescription').value,
         price: document.getElementById('salePrice').value,
         whatsapp: document.getElementById('saleWhatsapp').value.replace(/\D/g, ''),
         seller: document.getElementById('saleSeller').value,
-        image: document.getElementById('saleImage').value || '/static/assets/placeholder-sale.jpg',
+        image: imageInput.value || '/static/assets/placeholder-sale.jpg',
         active: true
       };
       try {
@@ -651,6 +682,9 @@
         if (res.ok) {
           await loadData();
           e.target.reset();
+          statusEl.textContent = 'Selecione uma imagem para enviar.';
+          imageInput.value = '/static/assets/placeholder-sale.jpg';
+          fileInput.value = '';
           showToast('Produto adicionado com sucesso!');
         }
       } catch (err) {
@@ -723,6 +757,9 @@
           await loadData();
           e.target.reset();
           document.getElementById('areaOrder').value = '0';
+          document.getElementById('areaImageStatus').textContent = 'Envie uma imagem representativa.';
+          document.getElementById('areaImageUrl').value = '';
+          document.getElementById('areaImageFile').value = '';
           showToast('Área adicionada com sucesso!');
         }
       } catch (err) {
