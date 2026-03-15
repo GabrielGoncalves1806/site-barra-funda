@@ -1,0 +1,20 @@
+<svg width="600" height="360" viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="psGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dfe9ff"/>
+      <stop offset="100%" stop-color="#a0b8ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="360" rx="24" fill="url(#psGradient)"/>
+  <g fill="#2d3a63">
+    <rect x="120" y="120" width="360" height="180" rx="12" opacity="0.8"/>
+    <rect x="150" y="150" width="60" height="120" rx="8" fill="#f8f9ff"/>
+    <rect x="240" y="150" width="60" height="120" rx="8" fill="#f8f9ff"/>
+    <rect x="330" y="150" width="60" height="120" rx="8" fill="#f8f9ff"/>
+    <rect x="255" y="90" width="90" height="70" rx="12" fill="#2d3a63"/>
+    <rect x="282" y="60" width="36" height="30" rx="6" fill="#2d3a63"/>
+    <rect x="284" y="110" width="32" height="32" rx="4" fill="#f04d4d"/>
+    <rect x="296" y="100" width="8" height="52" fill="#f8f9ff"/>
+    <rect x="278" y="122" width="44" height="8" fill="#f8f9ff"/>
+  </g>
+</svg>

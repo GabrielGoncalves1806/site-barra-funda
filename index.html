@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Condomínio Plano&Estação Barra Funda • Portal do Morador</title>
+  <meta name="description" content="Informações, avisos, documentos e áreas comuns do condomínio." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+  <header class="header">
+    <div class="container header__inner">
+      <div class="brand">
+        <div class="brand__mark" aria-hidden="true">🏢</div>
+        <div class="brand__text">
+          <strong class="brand__title">Plano&Estação Barra Funda</strong>
+          <span class="brand__subtitle">Portal do Morador</span>
+        </div>
+      </div>
+
+      <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav">
+        Menu
+      </button>
+
+      <nav id="nav" class="nav" aria-label="Navegação principal">
+        <button class="nav-tab active" data-tab="inicio">Início</button>
+        <button class="nav-tab" data-tab="areas">Áreas Comuns</button>
+        <button class="nav-tab" data-tab="documentos">Documentos/Avisos</button>
+        <button class="nav-tab nav-tab--highlight" data-tab="novo-morador">
+          <span class="highlight-badge">NOVO</span>
+          🏠 Novo Morador
+        </button>
+        <button class="nav-tab" data-tab="vendas">🛒 Vendas</button>
+        <button class="nav-tab" data-tab="contatos">Contatos</button>
+      </nav>
+
+    </div>
+  </header>
+
+  <main id="conteudo">
+    <!-- ABA INÍCIO -->
+    <div class="tab-content active" id="tab-inicio">
+      <section class="hero">
+        <div class="container hero__grid">
+          <div class="hero__copy">
+            <div class="hero-header">
+              <p class="pill">📌 Condomínio Plano&Estação Barra Funda</p>
+              <button class="pill-novo-morador-btn" data-tab="novo-morador">
+                <span class="pill-btn-icon">🏠</span>
+                <span class="pill-btn-text">Novo Morador</span>
+                <span class="pill-btn-badge">NOVO</span>
+              </button>
+            </div>
+            <h1>Tela de Novo Morador</h1>
+            <p class="lead">
+              Seu guia completo para se integrar à nossa comunidade. Encontre avisos, regras, documentos, contatos e
+              informações das áreas comuns.
+            </p>
+
+            <div class="hero__actions">
+              <button class="btn btn--primary" data-tab="documentos">Ver documentos/avisos</button>
+              <button class="btn btn--ghost" data-tab="documentos">Abrir documentos/avisos</button>
+            </div>
+
+            <div class="hero__info">
+              <div class="info-card">
+                <span class="info-card__label">Endereço</span>
+                <span class="info-card__value">Av. Thomas Edison, 944 • Barra Funda • São Paulo/SP</span>
+                <span class="info-card__hint">Baseado em fontes públicas</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero__media">
+            <div class="slider" aria-label="Galeria de áreas comuns">
+              <img class="slider__img is-active" src="assets/area-academia.jpg" alt="Academia equipada"
+                loading="eager" />
+              <img class="slider__img" src="assets/area-salao.jpg" alt="Salão de festas preparado" loading="lazy" />
+              <img class="slider__img" src="assets/area-coworking.jpg" alt="Espaço de coworking" loading="lazy" />
+              <img class="slider__img" src="assets/area-pet.jpg" alt="Espaço pet com gramado" loading="lazy" />
+
+              <div class="slider__controls">
+                <button class="icon-btn" type="button" data-slider="prev" aria-label="Imagem anterior">‹</button>
+                <button class="icon-btn" type="button" data-slider="next" aria-label="Próxima imagem">›</button>
+              </div>
+
+              <div class="slider__dots" role="tablist" aria-label="Selecionar imagem"></div>
+            </div>
+          </div>
+
+          <div class="hero__areas hero__areas--full">
+            <h3 class="areas-title">Áreas do Condomínio</h3>
+            <p class="areas-subtitle">Clique em cada área para ver as normas de uso, horários, capacidade e
+              orientações importantes</p>
+            <div class="areas-grid">
+              <button class="area-card" data-tab="areas" data-area="espaco-pet">
+                <span class="area-icon">🐾</span>
+                <span class="area-name">Espaço Pet</span>
+              </button>
+              <button class="area-card" data-tab="areas" data-area="lavanderia">
+                <span class="area-icon">🧺</span>
+                <span class="area-name">Lavanderia</span>
+              </button>
+              <button class="area-card" data-tab="areas" data-area="coworking">
+                <span class="area-icon">�</span>
+                <span class="area-name">Coworking</span>
+              </button>
+              <button class="area-card" data-tab="areas" data-area="salao">
+                <span class="area-icon">�</span>
+                <span class="area-name">Salão de Festas</span>
+              </button>
+              <button class="area-card" data-tab="areas" data-area="churrasqueira">
+                <span class="area-icon">🍖</span>
+                <span class="area-name">Churrasqueira</span>
+              </button>
+              <button class="area-card" data-tab="areas" data-area="academia">
+                <span class="area-icon">🏋️</span>
+                <span class="area-name">Academia</span>
+              </button>
+              <button class="area-card" data-tab="areas" data-area="mercadinho">
+                <span class="area-icon">🛒</span>
+                <span class="area-name">Mercadinho</span>
+              </button>
+              <button class="area-card" data-tab="areas" data-area="playground">
+                <span class="area-icon">🎠</span>
+                <span class="area-name">Playground</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="new-resident-highlight">
+        <div class="container">
+          <div class="welcome-card">
+            <div class="welcome-content">
+              <div class="welcome-badge">🏠 Novo Morador</div>
+              <h2 class="welcome-title">Bem-vindo ao seu novo lar!</h2>
+              <p class="welcome-text">
+                Preparamos um guia completo para você se integrar rapidamente à nossa comunidade.
+                Siga os passos essenciais e descubra tudo sobre o condomínio.
+              </p>
+              <div class="welcome-steps">
+                <div class="step-item">
+                  <span class="step-icon">📱</span>
+                  <span class="step-text">Cadastre-se no app Winker</span>
+                </div>
+                <div class="step-item">
+                  <span class="step-icon">🔐</span>
+                  <span class="step-text">Solicite reconhecimento facial</span>
+                </div>
+                <div class="step-item">
+                  <span class="step-icon">🧺</span>
+                  <span class="step-text">Configure a lavanderia</span>
+                </div>
+                <div class="step-item">
+                  <span class="step-icon">📋</span>
+                  <span class="step-text">Conheça as regras e áreas</span>
+                </div>
+              </div>
+              <button class="btn btn--primary btn--large" data-tab="novo-morador">
+                Ver guia completo do novo morador
+              </button>
+            </div>
+            <div class="welcome-visual">
+              <div class="welcome-emoji">🎉</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="quick">
+        <div class="container quick__grid">
+          <button class="quick__card" data-tab="areas">
+            <span class="quick__icon">🏋️</span>
+            <span class="quick__title">Áreas comuns</span>
+            <span class="quick__desc">Regras e orientações de uso</span>
+          </button>
+
+          <button class="quick__card" data-tab="documentos">
+            <span class="quick__icon">📄</span>
+            <span class="quick__title">Documentos/Avisos</span>
+            <span class="quick__desc">Regulamento, avisos e comunicados</span>
+          </button>
+
+          <button class="quick__card" data-tab="novo-morador">
+            <span class="quick__icon">🧳</span>
+            <span class="quick__title">Novo morador</span>
+            <span class="quick__desc">Checklist de entrada e cadastros</span>
+          </button>
+
+          <button class="quick__card" data-tab="contatos">
+            <span class="quick__icon">☎️</span>
+            <span class="quick__title">Contatos</span>
+            <span class="quick__desc">Portaria, síndico, emergências</span>
+          </button>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="container footer__inner">
+          <div>
+            <strong>Condomínio Plano&Estação Barra Funda</strong>
+            <div class="muted">Portal do Morador • Av. Thomas Edison, 944 • Barra Funda, SP</div>
+          </div>
+          <div class="muted">© <span id="year"></span></div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ABA ÁREAS COMUNS -->
+    <div class="tab-content" id="tab-areas">
+      <section id="areas" class="section">
+        <div class="container">
+          <div class="section__head">
+            <h2>Áreas Comuns</h2>
+            <p>
+              Conheça os espaços de lazer e convivência do condomínio. Faça reservas pelo app Winker.
+            </p>
+          </div>
+
+          <div class="cards">
+            <article class="card" data-area-detail="academia" role="button" tabindex="0"
+              aria-label="Ver detalhes da Academia">
+              <img src="assets/area-academia.jpg" alt="Academia" loading="lazy" />
+              <div class="card__body">
+                <h3>Academia</h3>
+                <ul>
+                  <li>Acesso 24h via reconhecimento facial.</li>
+                  <li>Exclusivo para moradores cadastrados.</li>
+                  <li>Uso obrigatório de toalha e tênis.</li>
+                  <li>Limpe e organize os equipamentos.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="card" data-area-detail="salao" role="button" tabindex="0"
+              aria-label="Ver detalhes do Salão de Festas">
+              <img src="assets/area-salao.jpg" alt="Salão de festas" loading="lazy" />
+              <div class="card__body">
+                <h3>Salão de Festas</h3>
+                <ul>
+                  <li>Capacidade para 30 pessoas.</li>
+                  <li>Dom-qui 10h-22h | Sex/sáb 10h-23h.</li>
+                  <li>Reserva no app Winker (48h).</li>
+                  <li>Taxa: 6% do salário mínimo.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="card" data-area-detail="lavanderia" role="button" tabindex="0"
+              aria-label="Ver detalhes da Lavanderia">
+              <img src="assets/area-lavanderia.jpg" alt="Lavanderia" loading="lazy" />
+              <div class="card__body">
+                <h3>Lavanderia Laundry Express</h3>
+                <ul>
+                  <li>Operação 24h com o app Laundry Express.</li>
+                  <li>Reserve máquinas e pague por uso.</li>
+                  <li>Retire as peças ao fim do ciclo.</li>
+                  <li>Informe falhas pelo aplicativo.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="card" data-area-detail="playground" role="button" tabindex="0"
+              aria-label="Ver detalhes do Playground">
+              <img src="assets/area-playground.jpg" alt="Playground" loading="lazy" />
+              <div class="card__body">
+                <h3>Playground</h3>
+                <ul>
+                  <li>Para crianças até 10 anos.</li>
+                  <li>Horário diário: 8h às 22h.</li>
+                  <li>Sob supervisão de um responsável.</li>
+                  <li>Organize e guarde os brinquedos.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+
+          <div class="cards" style="margin-top: 18px;">
+            <article class="card" data-area-detail="churrasqueira" role="button" tabindex="0"
+              aria-label="Ver detalhes da Churrasqueira">
+              <img src="assets/area-churrasqueira.jpg" alt="Churrasqueira" loading="lazy" />
+              <div class="card__body">
+                <h3>Churrasqueira</h3>
+                <ul>
+                  <li>Capacidade máxima: 15 pessoas.</li>
+                  <li>Funcionamento diário 10h-22h.</li>
+                  <li>Reserva pelo app Winker (48h).</li>
+                  <li>Taxa: 5% do salário mínimo.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="card" data-area-detail="coworking" role="button" tabindex="0"
+              aria-label="Ver detalhes do Coworking">
+              <img src="assets/area-coworking.jpg" alt="Coworking" loading="lazy" />
+              <div class="card__body">
+                <h3>Coworking</h3>
+                <ul>
+                  <li>Ambiente climatizado e Wi-Fi.</li>
+                  <li>Horário: 7h às 22h.</li>
+                  <li>Máx. 3 convidados por unidade.</li>
+                  <li>Use fones e mantenha silêncio.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="card" data-area-detail="espaco-pet" role="button" tabindex="0"
+              aria-label="Ver detalhes do Espaço Pet">
+              <img src="assets/area-pet.jpg" alt="Espaço Pet" loading="lazy" />
+              <div class="card__body">
+                <h3>Espaço Pet</h3>
+                <ul>
+                  <li>Funcionamento 24h.</li>
+                  <li>Use para necessidades dos pets.</li>
+                  <li>Somente animais vacinados e em coleira.</li>
+                  <li>Recolha os resíduos imediatamente.</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="card" data-area-detail="bicicletario" role="button" tabindex="0"
+              aria-label="Ver detalhes do Bicicletário">
+              <img src="assets/area-bicicletario.jpg" alt="Bicicletário" loading="lazy" />
+              <div class="card__body">
+                <h3>Bicicletário</h3>
+                <ul>
+                  <li>1 bicicleta por unidade cadastrada.</li>
+                  <li>Cadeado obrigatório.</li>
+                  <li>Identifique com bloco e apartamento.</li>
+                  <li>Não deixe acessórios ou caixas soltas.</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+
+          <div class="callout">
+            <div class="callout__title">Mercadinho</div>
+            <p>
+              O condomínio conta com um mercadinho de autoatendimento. Contato: (11) 99909-7730.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="modal" id="areaModal" aria-hidden="true">
+        <div class="modal__overlay" data-modal-close></div>
+        <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="areaModalTitle" tabindex="-1">
+          <button class="modal__close" type="button" data-modal-close aria-label="Fechar">×</button>
+          <img src="" alt="" class="modal__image" id="areaModalImage" />
+          <div class="modal__body">
+            <p class="modal__tag" id="areaModalTag"></p>
+            <h3 id="areaModalTitle"></h3>
+            <p id="areaModalDescription" class="modal__description"></p>
+            <ul id="areaModalHighlights" class="modal__list"></ul>
+            <div id="areaModalMeta" class="modal__meta"></div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <div class="container footer__inner">
+          <div>
+            <strong>Condomínio Plano&Estação Barra Funda</strong>
+            <div class="muted">Portal do Morador • Av. Thomas Edison, 944 • Barra Funda, SP</div>
+          </div>
+          <div class="muted"> <span class="year"></span></div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ABA DOCUMENTOS -->
+    <div class="tab-content" id="tab-documentos">
+      <section id="documentos" class="section">
+        <div class="container">
+          <div class="section__head">
+          </div>
+
+          <div class="docs">
+            <a class="doc" href="assets/REGULAMENTO%20INTERNO%20PLANO%20ESTAÇÃO%20BARRA%20FUNDA%2028.06.2023.pdf"
+              target="_blank" rel="noreferrer">
+              <span class="doc__icon">📘</span>
+              <span class="doc__title">Regulamento Interno</span>
+              <span class="doc__hint">Visualizar ou baixar PDF</span>
+            </a>
+
+            <a class="doc" href="assets/1752-Convenção%20Coletiva%20Plano%20e%20Estação%20Barra%20Funda.pdf"
+              target="_blank" rel="noreferrer">
+              <span class="doc__icon">📕</span>
+              <span class="doc__title">Convenção Coletiva</span>
+              <span class="doc__hint">Visualizar ou baixar PDF</span>
+            </a>
+
+            <a class="doc" href="#" target="_blank" rel="noreferrer">
+              <span class="doc__icon">🛠️</span>
+              <span class="doc__title">Manutenções e Certificados</span>
+              <span class="doc__hint">PDF / Drive</span>
+            </a>
+
+            <a class="doc" href="https://app.winker.com.br/intra/condominio/documento" target="_blank" rel="noreferrer">
+              <span class="doc__icon">🗓️</span>
+              <span class="doc__title">Atas e Comunicados</span>
+              <span class="doc__hint">PDF / Drive</span>
+            </a>
+          </div>
+
+          <div class="doc-notices">
+            <div class="section__head section__head--compact">
+              <h3>Avisos e Comunicados</h3>
+              <p>Atualize os avisos no arquivo <code>app.js</code> para refletir nesta página.</p>
+            </div>
+            <div class="notices" id="notices-docs" data-notices-root aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="container footer__inner">
+          <div>
+            <strong>Condomínio Plano&Estação Barra Funda</strong>
+            <div class="muted">Portal do Morador • Av. Thomas Edison, 944 • Barra Funda, SP</div>
+          </div>
+          <div class="muted"> <span class="year"></span></div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ABA NOVO MORADOR -->
+    <div class="tab-content" id="tab-novo-morador">
+      <section id="novo-morador" class="section section--alt">
+        <div class="container">
+          <div class="section__head">
+            <h2>Novo morador</h2>
+            <p>Siga estes passos para se integrar rapidamente à nossa comunidade.</p>
+          </div>
+
+          <div class="grid-2">
+            <div class="panel">
+              <h3>1. Cadastro no Portal Winker/OMA</h3>
+              <ul class="check">
+                <li>Instale o app "OMA Online" ou acesse o site.</li>
+                <li>Clique em "Quero me cadastrar" e digite seu e-mail.</li>
+                <li>Localize o condomínio: CEP 88095-001, Nº 366.</li>
+                <li>Confirme bloco, apartamento e nome completo.</li>
+                <li>Aguarde aprovação por e-mail.</li>
+              </ul>
+              <div class="service-links">
+                <a href="https://app.winker.com.br/intra" target="_blank" class="service-link">
+                  <span class="service-icon">🌐</span>
+                  <span>Acessar Site</span>
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=br.com.winker.wl.oma&hl=pt_BR" target="_blank"
+                  class="service-link">
+                  <span class="service-icon">🤖</span>
+                  <span>Android</span>
+                </a>
+                <a href="https://apps.apple.com/br/app/oma-online/id1625889108" target="_blank" class="service-link">
+                  <span class="service-icon">🍎</span>
+                  <span>iOS</span>
+                </a>
+              </div>
+            </div>
+
+            <div class="panel">
+              <h3>2. Reconhecimento Facial</h3>
+              <ul class="check">
+                <li>Após cadastro no Winker, envie por e-mail:</li>
+                <li>Foto 3x4 (fundo branco, sem boné), RG e CPF.</li>
+                <li>Nome completo e nº da unidade (bloco + apto).</li>
+                <li>E-mails: everton.moraees@gmail.com ou jessica.voltane@oma.com.br</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top: 18px;">
+            <div class="panel">
+              <h3>3. Lavanderia Laundry Express</h3>
+              <ul class="check">
+                <li>Instale o app "Laundry Express".</li>
+                <li>Acesse laundryexpress.com.br e clique em "Cadastre-se".</li>
+                <li>Ative seu acesso com cartão/QR Code na lavanderia.</li>
+                <li>Use o app para reservar máquinas e pagar por uso.</li>
+              </ul>
+              <div class="service-links">
+                <a href="https://laundryexpress.com.br/#/login" target="_blank" class="service-link">
+                  <span class="service-icon">🌐</span>
+                  <span>Acessar Site</span>
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=com.ideologica.laundryexpress&hl=pt_BR"
+                  target="_blank" class="service-link">
+                  <span class="service-icon">🤖</span>
+                  <span>Android</span>
+                </a>
+                <a href="https://apps.apple.com/br/app/laundry-express/id1515742848" target="_blank"
+                  class="service-link">
+                  <span class="service-icon">🍎</span>
+                  <span>iOS</span>
+                </a>
+              </div>
+            </div>
+
+            <div class="panel">
+              <h3>4. Portal Mercadinho</h3>
+              <ul class="check">
+                <li>Instale o app "New Market Place".</li>
+                <li>Faça pedidos de produtos e serviços.</li>
+                <li>Receba entregas diretamente no condomínio.</li>
+                <li>Aproveite ofertas exclusivas para moradores.</li>
+              </ul>
+              <div class="service-links">
+                <a href="https://play.google.com/store/apps/details?id=br.com.vertitecnologia.vmmarket.newmarketplace&hl=pt_BR"
+                  target="_blank" class="service-link">
+                  <span class="service-icon">🤖</span>
+                  <span>Android</span>
+                </a>
+                <a href="https://apps.apple.com/br/app/new-market-place/id6740237420" target="_blank"
+                  class="service-link">
+                  <span class="service-icon">🍎</span>
+                  <span>iOS</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="container footer__inner">
+          <div>
+            <strong>Condomínio Plano&Estação Barra Funda</strong>
+            <div class="muted">Portal do Morador • Av. Thomas Edison, 944 • Barra Funda, SP</div>
+          </div>
+          <div class="muted"> <span class="year"></span></div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ABA CONTATOS -->
+    <div class="tab-content" id="tab-contatos">
+      <section id="contatos" class="section">
+        <div class="container">
+          <div class="section__head">
+            <h2>Contatos</h2>
+            <p>
+              Endereço: Av. Thomas Edison, 944 — Barra Funda, São Paulo/SP.
+            </p>
+          </div>
+
+          <div class="grid-2">
+            <div class="panel">
+              <h3>Telefones e e-mails</h3>
+              <div class="contact-list">
+                <div class="contact">
+                  <div class="contact__k">Portaria 24h</div>
+                  <div class="contact__v">(11) 96335-0837</div>
+                </div>
+                <div class="contact">
+                  <div class="contact__k">Zeladoria</div>
+                  <div class="contact__v">(11) 96337-0153</div>
+                </div>
+                <div class="contact">
+                  <div class="contact__k">Administração</div>
+                  <div class="contact__v">(11) 97650-6826</div>
+                </div>
+                <div class="contact">
+                  <div class="contact__k">Síndico</div>
+                  <div class="contact__v">(13) 98150-0179</div>
+                </div>
+                <div class="contact">
+                  <div class="contact__k">Mercadinho</div>
+                  <div class="contact__v">(11) 99909-7730</div>
+                </div>
+                <div class="contact">
+                  <div class="contact__k">SAMU / Bombeiros / Polícia</div>
+                  <div class="contact__v">192 / 193 / 190</div>
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <h3>Enviar solicitação</h3>
+              <form class="form" id="requestForm">
+                <label>
+                  Assunto
+                  <input required name="subject" placeholder="Ex.: Manutenção, barulho, reserva de área..." />
+                </label>
+                <label>
+                  Mensagem
+                  <textarea required name="message" rows="4" placeholder="Descreva sua solicitação..."></textarea>
+                </label>
+                <button class="btn btn--primary" type="submit">Gerar mensagem</button>
+                <p class="form__hint">Este botão não envia e-mail sozinho: ele gera um texto pronto para você copiar e
+                  mandar no WhatsApp/e-mail.</p>
+              </form>
+            </div>
+
+            <div class="panel">
+              <h3>Localização</h3>
+              <p class="muted">
+                Para evitar dependências, deixei um botão que abre o mapa no Google. Você pode substituir por um iframe
+                do
+                Google Maps (Embed) depois.
+              </p>
+              <a class="btn btn--ghost" target="_blank" rel="noreferrer"
+                href="https://www.google.com/maps/search/?api=1&query=Av.%20Thomas%20Edison%2C%20944%20-%20Barra%20Funda%2C%20S%C3%A3o%20Paulo%20-%20SP">
+                Abrir no Google Maps
+              </a>
+
+              <div class="map-placeholder" aria-hidden="true">
+                <div class="map-placeholder__pin">📍</div>
+                <div class="map-placeholder__text">
+                  Av. Thomas Edison, 944<br />
+                  Barra Funda • São Paulo/SP
+                </div>
+              </div>
+
+              <div class="divider"></div>
+
+              <h3>Hospitais e emergências próximos</h3>
+              <div class="hospital-cards">
+                <a class="hospital-card" target="_blank" rel="noreferrer"
+                  href="https://www.google.com/maps/place/R.+Vitorino+Carmilo,+717+-+Barra+Funda,+São+Paulo+-+SP,+01153-000">
+                  <div class="hospital-card__icon">🏥</div>
+                  <div>
+                    <h4>PS Municipal Barra Funda</h4>
+                    <p class="hospital-card__tag">Público | Municipal • 24h</p>
+                    <p class="hospital-card__meta">R. Vitorino Carmilo, 717 — (11) 3826-5666 / (11) 4210-5425</p>
+                  </div>
+                </a>
+
+                <a class="hospital-card" target="_blank" rel="noreferrer"
+                  href="https://www.google.com/maps/place/Av.+Dr.+Abraão+Ribeiro,+283+-+Barra+Funda,+São+Paulo+-+SP,+01133-000">
+                  <div class="hospital-card__icon">🏥</div>
+                  <div>
+                    <h4>Centro de Saúde Escola Barra Funda (Santa Casa)</h4>
+                    <p class="hospital-card__tag">Público | Municipal • 07h às 17h</p>
+                    <p class="hospital-card__meta">Av. Dr. Abraão Ribeiro, 283 — (11) 3466-2500</p>
+                  </div>
+                </a>
+              </div>
+
+              <p class="hospital-list__hint">Fontes: <a target="_blank" rel="noreferrer"
+                  href="https://www.estacaobarrafunda.com/hospitais-e-emerg%C3%AAncias-pr%C3%B3ximos">Estação Barra
+                  Funda</a> e sites oficiais.</p>
+
+              <div class="divider"></div>
+
+              <h3>FAQ - Perguntas Frequentes</h3>
+              <div class="faq">
+                <details>
+                  <summary>� Quem precisa seguir o regulamento interno?</summary>
+                  <p>Todos os ocupantes do condomínio: proprietários, inquilinos, comodatários, visitantes e prestadores
+                    de serviço. A convivência é coletiva e o regulamento se aplica igualmente a todos.</p>
+                </details>
+                <details>
+                  <summary>� Até que horas posso fazer barulho?</summary>
+                  <p>Horário de silêncio: segunda a sexta das 22h às 7h, fins de semana e feriados das 22h às 8h. Mesmo
+                    fora desses horários, use o bom senso para não incomodar vizinhos.</p>
+                </details>
+                <details>
+                  <summary>� Portaria recebe qualquer tipo de entrega?</summary>
+                  <p>Somente volumes pequenos (até 40x40 cm). A portaria não recebe móveis, compras grandes ou
+                    alimentos. Combine entregas volumosas para recebimento direto pelo morador.</p>
+                </details>
+                <details>
+                  <summary>�️ Quero fazer reforma: como proceder?</summary>
+                  <p>Envie projeto com ART/RRT assinada, aguarde aprovação do síndico e respeite os horários permitidos
+                    (seg-sex 8h às 17h, sáb 9h às 12h). Domingos e feriados são proibidos.</p>
+                </details>
+                <details>
+                  <summary>🏡 Posso alugar meu apartamento por temporada?</summary>
+                  <p>Sim, mas o proprietário segue responsável pelos hóspedes. Cadastre-os, entregue o regulamento e
+                    limite o uso às áreas liberadas (academia, coworking, playground e lavanderia).</p>
+                </details>
+                <details>
+                  <summary>� Animais de estimação são permitidos?</summary>
+                  <p>São, desde que em coleira (e focinheira para raças grandes), circulando apenas até o Espaço Pet.
+                    Tutores devem recolher resíduos, controlar ruídos e manter vacinas em dia.</p>
+                </details>
+                <details>
+                  <summary>� Como funciona o salão de festas?</summary>
+                  <p>Uso exclusivo de moradores, com reserva via portal com 48h de antecedência. Horário: 10h-22h
+                    (dom-qui) e até 23h (sex/sáb). Capacidade 30 pessoas e taxa de 6% do salário mínimo.</p>
+                </details>
+                <details>
+                  <summary>🍖 E a churrasqueira?</summary>
+                  <p>Capacidade 15 pessoas, horário diário das 10h às 22h, reserva com 48h e taxa de 5% do salário
+                    mínimo. Não pode ser usada junto com o salão pela mesma unidade.</p>
+                </details>
+                <details>
+                  <summary>🏗️ Posso alterar fachada, instalar varal ou antena?</summary>
+                  <p>Não. A fachada é padrão coletivo. É proibido pintar, furar, instalar toldos, vasos, películas,
+                    antenas ou varais visíveis.</p>
+                </details>
+                <details>
+                  <summary>🚭 É permitido fumar nas áreas comuns?</summary>
+                  <p>Não. A legislação federal proíbe fumar em qualquer dependência coletiva do condomínio.</p>
+                </details>
+                <details>
+                  <summary>� Como registrar reclamação ou sugestão?</summary>
+                  <p>Use os canais oficiais: portal da administradora, e-mail ou contato direto com
+                    síndico/administrador. Evite recados informais para porteiros.</p>
+                </details>
+                <details>
+                  <summary>� Visitantes podem usar áreas comuns?</summary>
+                  <p>As áreas de lazer são exclusivas dos moradores. Visitantes só podem acessar espaços reservados que
+                    estejam vinculados a uma unidade e identificados na lista de convidados.</p>
+                </details>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="container footer__inner">
+          <div>
+            <strong>Condomínio Plano&Estação Barra Funda</strong>
+            <div class="muted">Portal do Morador • Av. Thomas Edison, 944 • Barra Funda, SP</div>
+          </div>
+          <div class="muted"> <span class="year"></span></div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ABA VENDAS -->
+    <div class="tab-content" id="tab-vendas">
+      <section class="section">
+        <div class="container">
+          <div class="section__head">
+            <h2>🛒 Vendas entre Moradores</h2>
+            <p>Confira os produtos e serviços oferecidos pelos moradores do condomínio. Clique no botão para entrar em
+              contato pelo WhatsApp.</p>
+          </div>
+
+          <div class="sales-grid" data-sales-root></div>
+
+          <div class="sales-empty" id="salesEmpty" style="display: none;">
+            <div class="sales-empty__icon">🛍️</div>
+            <h3>Nenhum produto disponível</h3>
+            <p>No momento não há produtos anunciados. Volte em breve!</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="container footer__inner">
+          <div>
+            <strong>Condomínio Plano&Estação Barra Funda</strong>
+            <div class="muted">Portal do Morador • Av. Thomas Edison, 944 • Barra Funda, SP</div>
+          </div>
+          <div class="muted"><span class="year"></span></div>
+        </div>
+      </footer>
+    </div>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

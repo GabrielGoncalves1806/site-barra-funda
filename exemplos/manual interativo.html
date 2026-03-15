@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cartilha de Boas-Vindas - Condomínio Plano&Estação Barra Funda</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --azul-principal: #003b73;
+      --azul-claro: #f2f6fb;
+      --vermelho-acao: #e30613;
+      --cinza-texto: #333333;
+      --cinza-borda: #e0e0e0;
+      --bg-card: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: var(--azul-claro);
+      color: var(--cinza-texto);
+    }
+
+    header {
+      background: var(--azul-principal);
+      color: #fff;
+      padding: 20px 15px;
+    }
+
+    header .topbar {
+      max-width: 1100px;
+      margin: 0 auto 10px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    header .logo {
+      font-weight: bold;
+      letter-spacing: 0.05em;
+    }
+
+    header .topbar a {
+      color: #fff;
+      text-decoration: none;
+      margin-left: 10px;
+    }
+
+    header .hero {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    header .hero-text {
+      flex: 1 1 260px;
+    }
+
+    header .hero-text h1 {
+      margin: 0 0 8px 0;
+      font-size: 24px;
+    }
+
+    header .hero-text p {
+      margin: 0;
+      font-size: 14px;
+      max-width: 480px;
+    }
+
+    header .hero-highlight {
+      flex: 0 0 260px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    header .hero-highlight strong {
+      font-size: 13px;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 20px auto 40px auto;
+      padding: 0 15px;
+    }
+
+    .secao {
+      margin-bottom: 24px;
+    }
+
+    /* HERO CONDOMÍNIO COM FOTOS */
+    .hero-condominio {
+      display: grid;
+      grid-template-columns: 1.3fr 1.7fr;
+      gap: 20px;
+      align-items: center;
+      margin-top: 20px;
+      margin-bottom: 32px;
+    }
+
+    .hero-texto h2 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .hero-texto p {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .hero-fotos {
+      display: grid;
+      grid-template-columns: 2fr 1.4fr;
+      gap: 8px;
+    }
+
+    .hero-foto img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    .hero-foto.grande {
+      grid-row: span 2;
+    }
+
+    .hero-foto.coluna {
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .intro-box {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      border-top: 4px solid var(--vermelho-acao);
+    }
+
+    .intro-box h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+
+    .intro-cta {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      background: var(--vermelho-acao);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .btn-outline {
+      display: inline-block;
+      border: 1px solid var(--vermelho-acao);
+      color: var(--vermelho-acao);
+      padding: 8px 14px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 13px;
+      background: #ffffff;
+    }
+
+    .section-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 15px;
+      font-size: 12px;
+    }
+
+    .section-nav a {
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--cinza-borda);
+      color: var(--cinza-texto);
+      background: #fff;
+    }
+
+    .section-nav a:hover {
+      border-color: var(--vermelho-acao);
+      color: var(--vermelho-acao);
+    }
+
+    /* GRID ÁREAS CLICÁVEIS */
+    .grid-areas {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .area-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 10px;
+      text-decoration: none;
+      background: #ffffff;
+      border-radius: 10px;
+      border: 1px solid #e5e5e5;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      color: #333;
+      font-size: 13px;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
+      text-align: center;
+    }
+
+    .area-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      border-color: var(--vermelho-acao);
+    }
+
+    .area-icone {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .area-nome {
+      font-weight: 600;
+    }
+
+    /* Accordion */
+    .accordion-item {
+      background: var(--bg-card);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      overflow: hidden;
+      border: 1px solid #f0f0f0;
+    }
+
+    .accordion-header {
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      border-left: 4px solid var(--azul-principal);
+    }
+
+    .accordion-header h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .accordion-header span.toggle-icon {
+      font-size: 18px;
+      color: var(--azul-principal);
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease-out;
+      padding: 0 16px;
+      background: #fafafa;
+    }
+
+    .accordion-content-inner {
+      padding: 12px 0 16px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .accordion-item.active .accordion-content {
+      padding: 0 16px;
+    }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--cinza-borda);
+      font-size: 13px;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      font-size: 14px;
+      color: var(--azul-principal);
+    }
+
+    .card small {
+      color: #777;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Normas por área */
+    #normas-areas {
+      margin-top: 18px;
+    }
+
+    #normas-areas h2 {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .bloco-area {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 12px 14px;
+      border: 1px solid #eeeeee;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      margin-top: 10px;
+    }
+
+    .bloco-area h3 {
+      margin-top: 0;
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .bloco-area ul {
+      padding-left: 18px;
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .bloco-area li {
+      margin-bottom: 4px;
+    }
+
+    /* Quiz e checklist */
+    .checklist {
+      padding-left: 0;
+      margin-top: 8px;
+    }
+
+    .checklist li {
+      list-style: none;
+      margin: 4px 0;
+      font-size: 13px;
+    }
+
+    .checklist input[type="checkbox"] {
+      margin-right: 6px;
+    }
+
+    .quiz-block {
+      background: #f2f6fb;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-top: 12px;
+      font-size: 13px;
+      border-left: 3px solid var(--azul-principal);
+    }
+
+    .quiz-question {
+      margin: 4px 0 6px;
+      font-weight: bold;
+    }
+
+    .contacts-list li {
+      margin-bottom: 4px;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      padding: 15px;
+      border-top: 1px solid #ddd;
+      background: #ffffff;
+    }
+
+    @media (max-width: 768px) {
+      header .hero {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      header .hero-highlight {
+        width: 100%;
+      }
+      .hero-condominio {
+        grid-template-columns: 1fr;
+      }
+      .hero-fotos {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <div class="logo">Condomínio Plano&amp;Estação Barra Funda</div>
+    <div>
+      <a href="#inicio">Cartilha</a>
+      <a href="#contatos">Contatos</a>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="hero-text">
+      <h1>Boas-vindas ao seu novo condomínio</h1>
+      <p>Você está a poucos passos de viver o melhor da Barra Funda, ao lado da Estação Palmeiras–Barra Funda e com toda a conveniência da região.[web:7][web:11]</p>
+    </div>
+    <div class="hero-highlight">
+      <strong>Condomínio Plano&amp;Estação Barra Funda</strong><br>
+      Avenida Thomas Edison, 944 – Barra Funda, São Paulo/SP.[attached_file:1][web:2]<br>
+      Apartamentos de 1 dormitório, com lazer e serviços pensados para o dia a dia conectado à estação de metrô, trem e terminal rodoviário.[web:2][web:11]
+    </div>
+  </div>
+</header>
+
+<main id="inicio">
+
+  <!-- HERO COM FOTOS DO CONDOMÍNIO -->
+  <section class="hero-condominio secao">
+    <div class="hero-texto">
+      <h2>Seu novo lar, pronto para viver</h2>
+      <p>Conheça alguns espaços do condomínio que fazem parte da sua rotina: áreas de lazer, convivência, trabalho e serviços práticos para o dia a dia.[file:16]</p>
+    </div>
+    <div class="hero-fotos">
+      <div class="hero-foto grande">
+        <img src="imagens/fachada-condominio.jpg" alt="Fachada do condomínio" />
+      </div>
+      <div class="hero-foto coluna">
+        <img src="imagens/lazer-piscina.jpg" alt="Área de lazer" />
+        <img src="imagens/salao-festas.jpg" alt="Salão de festas do condomínio" />
+      </div>
+    </div>
+  </section>
+
+  <!-- INTRODUÇÃO / CARTILHA -->
+  <section class="intro-box secao">
+    <h2>Cartilha de Boas-Vindas</h2>
+    <p>Que alegria ter você conosco! Esta cartilha foi preparada para ajudá-lo a se integrar rapidamente à nossa comunidade, entendendo como usar os sistemas, serviços e áreas comuns com segurança e respeito.[file:1]</p>
+    <p>Aqui você encontra o essencial: acessos digitais, lavanderia compartilhada, regras principais, reservas de espaços, canais de comunicação e contatos de emergência.[file:1]</p>
+
+    <div class="intro-cta">
+      <a href="#confirmacao" class="btn-primary">Li e estou de acordo</a>
+      <a href="#acessos" class="btn-outline">Ir direto para acessos e aplicativos</a>
+    </div>
+  </section>
+
+  <!-- MENU DE SEÇÕES -->
+  <div class="section-nav">
+    <a href="#acessos">Acessos e aplicativos</a>
+    <a href="#areas-condominio">Áreas do condomínio</a>
+    <a href="#normas-areas">Normas das áreas</a>
+    <a href="#regras">Regras de convivência</a>
+    <a href="#grupos">Grupos e comunicação</a>
+    <a href="#saude">Saúde e emergências</a>
+    <a href="#confirmacao">Confirmação de leitura</a>
+  </div>
+
+  <!-- ÁREAS DO CONDOMÍNIO – CARDS CLICÁVEIS -->
+  <section id="areas-condominio" class="secao">
+    <h2>Áreas do Condomínio</h2>
+    <p>Clique em cada área para ver as normas de uso, horários, capacidade e orientações importantes.[file:16]</p>
+
+    <div class="grid-areas">
+      <a href="#area-espaco-pet" class="area-card">
+        <span class="area-icone">🐾</span>
+        <span class="area-nome">Espaço Pet</span>
+      </a>
+
+      <a href="#area-lavanderia" class="area-card">
+        <span class="area-icone">🧺</span>
+        <span class="area-nome">Lavanderia</span>
+      </a>
+
+      <a href="#area-coworking" class="area-card">
+        <span class="area-icone">💻</span>
+        <span class="area-nome">Coworking</span>
+      </a>
+
+      <a href="#area-salao-festas" class="area-card">
+        <span class="area-icone">🎉</span>
+        <span class="area-nome">Salão de Festas</span>
+      </a>
+
+      <a href="#area-churrasqueira" class="area-card">
+        <span class="area-icone">🥩</span>
+        <span class="area-nome">Churrasqueira</span>
+      </a>
+
+      <a href="#area-academia" class="area-card">
+        <span class="area-icone">🏋️</span>
+        <span class="area-nome">Academia</span>
+      </a>
+
+      <a href="#area-mercadinho" class="area-card">
+        <span class="area-icone">🛒</span>
+        <span class="area-nome">Mercadinho</span>
+      </a>
+
+      <a href="#area-playground" class="area-card">
+        <span class="area-icone">🛝</span>
+        <span class="area-nome">Playground</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- 1. ACESSOS E SISTEMAS -->
+  <div class="accordion-item" id="acessos">
+    <div class="accordion-header">
+      <h2>1. Acessos, aplicativos e sistemas</h2>
+      <span class="toggle-icon">+</span>
+    </div>
+    <div class="accordion-content">
+      <div class="accordion-content-inner">
+        <p>Sua porta de entrada para gerenciar tudo no condomínio, com maior segurança e praticidade para o dia a dia.[file:16]</p>
+
+        <div class="card-grid">
+          <div class="card">
+            <small>Digital</small>
+            <h3>Portal / App do Condomínio</h3>
+            <p>Use o portal/app para: 2ª via de boletos, comunicados, reservas de áreas comuns, registro de ocorrências e atualização de cadastro.[file:1][file:16]</p>
+            <p>
+              <a href="#" target="_blank">Acessar portal / app</a><br>
+              <a href="#" target="_blank">Baixar para Android</a><br>
+              <a href="#" target="_blank">Baixar para iOS</a>
+            </p>
+          </div>
+
+          <div class="card">
+            <small>Serviço</small>
+            <h3>Lavanderia – Laundry Express</h3>
+            <p>Lavanderia compartilhada com máquinas inteligentes, pagamento por uso e operação via sistema <strong>Laundry Express</strong> (app/portal).[file:1][web:12]</p>
+            <p>
+              <a href="#" target="_blank">Acessar Laundry Express</a><br>
+              <a href="#" target="_blank">Ver passo a passo</a>
+            </p>
+          </div>
+
+          <div class="card">
+            <small>Acesso</small>
+            <h3>Portaria e controle de entradas</h3>
+            <p>[Descreva: cadastro no sistema, QR Code, biometria, tags veiculares, cadastro de visitantes e prestadores, regras para entregas.]</p>
+            <p>
+              <a href="#" target="_blank">Manual rápido de acesso</a>
+            </p>
+          </div>
+        </div>
+
+        <div class="quiz-block">
+          <p class="quiz-question">Importante</p>
+          <p>Você deve estar cadastrado no portal/app do condomínio antes de usar alguns serviços, como reservas, lavanderia e liberação de visitantes.[file:16]</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NORMAS DAS ÁREAS -->
+  <section id="normas-areas" class="secao">
+    <h2>Normas de uso das áreas</h2>
+    <p>Confira as regras principais de cada espaço. Sempre que tiver dúvida, consulte esta cartilha ou a administração.[file:16]</p>
+
+    <article id="area-espaco-pet" class="bloco-area">
+      <h3>Espaço Pet</h3>
+      <ul>
+        <li>[Horário de funcionamento do Espaço Pet]</li>
+        <li>Uso exclusivo de animais devidamente vacinados e sob supervisão do tutor.</li>
+        <li>É obrigatório recolher os dejetos e manter o espaço limpo após o uso.</li>
+        <li>Respeite outros animais e moradores, evitando conflitos e barulhos excessivos.</li>
+      </ul>
+    </article>
+
+    <article id="area-lavanderia" class="bloco-area">
+      <h3>Lavanderia</h3>
+      <ul>
+        <li>Uso via sistema Laundry Express (app/portal) – pagamento por uso e máquinas inteligentes.[file:16][web:12]</li>
+        <li>[Horário de funcionamento da lavanderia e limite de ciclos por unidade/dia]</li>
+        <li>Retire suas roupas imediatamente após o fim do ciclo para não atrasar outros moradores.</li>
+        <li>Siga as instruções de carga e produtos indicados, evitando danos às máquinas.</li>
+      </ul>
+    </article>
+
+    <article id="area-coworking" class="bloco-area">
+      <h3>Coworking</h3>
+      <ul>
+        <li>[Horário de funcionamento do coworking]</li>
+        <li>Ambiente de trabalho compartilhado: mantenha silêncio, use fones de ouvido e evite chamadas em viva-voz.</li>
+        <li>[Uso por ordem de chegada ou reserva via app, se houver]</li>
+        <li>Evite deixar pertences pessoais desassistidos por longos períodos.</li>
+      </ul>
+    </article>
+
+    <article id="area-salao-festas" class="bloco-area">
+      <h3>Salão de Festas</h3>
+      <ul>
+        <li>Até 30 pessoas | Dom-qui: 10h-22h | Sex-sáb: 10h-23h | Taxa: [valor/tipo definido pelo condomínio].[file:16]</li>
+        <li>Reserva obrigatória via app/portaria, sujeita à disponibilidade e regras internas.</li>
+        <li>Responsável pela reserva responde por danos, limpeza e cumprimento dos horários.</li>
+        <li>[Normas para som, DJ, decoração, uso de bebidas e controle de convidados]</li>
+      </ul>
+    </article>
+
+    <article id="area-churrasqueira" class="bloco-area">
+      <h3>Churrasqueira</h3>
+      <ul>
+        <li>Até 15 pessoas | Todos os dias: 10h-22h | Taxa: [valor/tipo definido pelo condomínio].[file:16]</li>
+        <li>Reserva via app/portaria. Chegue no horário e finalize a limpeza até o término do período.</li>
+        <li>Use o equipamento com segurança, seguindo as orientações de gás, carvão ou elétrico.</li>
+        <li>Evite som alto e fumaça excessiva que possa incomodar os vizinhos.</li>
+      </ul>
+    </article>
+
+    <article id="area-academia" class="bloco-area">
+      <h3>Academia</h3>
+      <ul>
+        <li>24 horas | Exclusivo para condôminos | Roupas e tênis obrigatórios.[file:16]</li>
+        <li>[Idade mínima para uso desacompanhado e regras para menores]</li>
+        <li>Higienize os equipamentos após o uso e evite ocupar o mesmo aparelho por muito tempo.</li>
+        <li>[Regras sobre personal trainer e convidados, conforme definido pelo condomínio]</li>
+      </ul>
+    </article>
+
+    <article id="area-mercadinho" class="bloco-area">
+      <h3>Mercadinho</h3>
+      <ul>
+        <li>[Horário de funcionamento do mercadinho]</li>
+        <li>Sistema de autoatendimento; siga as instruções de compra e pagamento informadas no espaço.</li>
+        <li>Verifique sempre se a compra foi registrada corretamente e guarde os comprovantes.</li>
+        <li>Em caso de dúvidas, entre em contato com o suporte indicado no mercadinho.</li>
+      </ul>
+    </article>
+
+    <article id="area-playground" class="bloco-area">
+      <h3>Playground</h3>
+      <ul>
+        <li>Crianças até 10 anos | [Horário sugerido, ex.: 8h-22h todos os dias].[file:16]</li>
+        <li>Crianças devem estar sempre acompanhadas por responsável maior de idade.</li>
+        <li>Não é permitido o uso de brinquedos que possam colocar outras crianças em risco.</li>
+        <li>Respeite os equipamentos, evitando depredação e uso inadequado.</li>
+      </ul>
+    </article>
+  </section>
+
+  <!-- 2. REGRAS DE CONVIVÊNCIA -->
+  <div class="accordion-item" id="regras">
+    <div class="accordion-header">
+      <h2>2. Regras principais de convivência</h2>
+      <span class="toggle-icon">+</span>
+    </div>
+    <div class="accordion-content">
+      <div class="accordion-content-inner">
+        <p>Somos uma comunidade: pequenas atitudes fazem grande diferença para evitar conflitos e garantir o bem-estar de todos.[file:16]</p>
+
+        <div class="card-grid">
+          <div class="card">
+            <h3>Horário de silêncio</h3>
+            <p>| Período | Horário de silêncio |<br>| Seg–Sex | 22h00 às 07h00 |<br>| Sáb, Dom e feriados | 22h00 às 08h00 |[file:16]</p>
+          </div>
+          <div class="card">
+            <h3>Obras</h3>
+            <p>✅ Horários permitidos para obras: [definir dias e horários compatíveis].<br>❌ Proibido sempre: obras em horários de silêncio ou que coloquem em risco a estrutura e segurança.[file:16]</p>
+          </div>
+          <div class="card">
+            <h3>Respeito ao vizinho</h3>
+            <p>Evite música alta, arrastar móveis em horários sensíveis e uso indevido de áreas comuns.[file:16]</p>
+          </div>
+        </div>
+
+        <h3>Checklist de convivência</h3>
+        <ul class="checklist">
+          <li><label><input type="checkbox"> Respeitar horários de silêncio todos os dias.</label></li>
+          <li><label><input type="checkbox"> Informar obras com antecedência à administração.</label></li>
+          <li><label><input type="checkbox"> Ajudar a manter áreas comuns limpas e organizadas.</label></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. GRUPOS E COMUNICAÇÃO -->
+  <div class="accordion-item" id="grupos">
+    <div class="accordion-header">
+      <h2>3. Grupos, comunicados e canais oficiais</h2>
+      <span class="toggle-icon">+</span>
+    </div>
+    <div class="accordion-content">
+      <div class="accordion-content-inner">
+        <p>Os grupos são canais importantes para comunicados rápidos, integração e avisos do dia a dia. Utilize-os com responsabilidade e respeito.[file:1][file:16]</p>
+
+        <h3>Grupos disponíveis</h3>
+        <p>Escolha os grupos abaixo para participar (substitua pelos links reais):[file:1]</p>
+
+        <ul>
+          <li><a href="#" target="_blank">Grupo Oficial de Comunicados</a></li>
+          <li><a href="#" target="_blank">Grupo Vagas de Garagem / Trocas</a></li>
+          <li><a href="#" target="_blank">Grupo Convivência e Eventos</a></li>
+        </ul>
+
+        <div class="quiz-block">
+          <p class="quiz-question">Boas práticas nos grupos</p>
+          <p>- Evite correntes, temas políticos e mensagens ofensivas.<br>
+             - Priorize assuntos do condomínio e use linguagem respeitosa.<br>
+             - Sempre que possível, use canais oficiais para assuntos formais.[file:16]</p>
+        </div>
+
+        <h3 id="contatos">Canais oficiais da administração</h3>
+        <ul class="contacts-list">
+          <li>E-mail da administração: <a href="mailto:administracao@condominio.com.br">administracao@condominio.com.br</a></li>
+          <li>WhatsApp da portaria: <a href="https://wa.me/55XXXXXXXXXXX" target="_blank">Clique para falar com a portaria</a></li>
+          <li>Aplicativo do condomínio: [Nome do app / link de acesso]</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. SAÚDE E EMERGÊNCIAS -->
+  <div class="accordion-item" id="saude">
+    <div class="accordion-header">
+      <h2>4. Saúde, segurança e emergências</h2>
+      <span class="toggle-icon">+</span>
+    </div>
+    <div class="accordion-content">
+      <div class="accordion-content-inner">
+        <p>Em situações de urgência, é importante saber onde buscar ajuda e quais são os principais contatos do condomínio.[file:1][file:16]</p>
+
+        <h3>Unidades de saúde próximas</h3>
+        <ul>
+          <li>UPA / Pronto Atendimento [Nome] – <a href="#" target="_blank">Ver no mapa</a></li>
+          <li>Hospital [Nome] – <a href="#" target="_blank">Ver no mapa</a></li>
+          <li>Pronto Socorro [Nome] – <a href="#" target="_blank">Ver no mapa</a></li>
+        </ul>
+
+        <h3>Contatos importantes</h3>
+        <ul class="contacts-list">
+          <li>Portaria 24h: <a href="tel:+55XXXXXXXXXXX">Ligar para a portaria</a></li>
+          <li>Síndico / Administração: <a href="tel:+55XXXXXXXXXXX">Ligar para a administração</a></li>
+          <li>Emergência: 190 (Polícia), 192 (SAMU), 193 (Bombeiros).[web:7]</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. CONFIRMAÇÃO -->
+  <div class="accordion-item" id="confirmacao">
+    <div class="accordion-header">
+      <h2>5. Confirmação de leitura</h2>
+      <span class="toggle-icon">+</span>
+    </div>
+    <div class="accordion-content">
+      <div class="accordion-content-inner">
+        <p>Siga esta ordem para se integrar rapidamente: cadastre-se no app/portal, leia esta cartilha, participe dos grupos oficiais e, por fim, registre sua ciência.[file:16]</p>
+        <p>
+          <a href="#" class="btn-primary" target="_blank">
+            Preencher termo de ciência (Formulário)
+          </a>
+        </p>
+        <p>Substitua o link acima por um formulário (Google Forms, Microsoft Forms, etc.) integrado ao seu fluxo de cadastro de novos moradores.[file:1]</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Versão [DATA] – Este material é informativo e não substitui a Convenção, o Regimento Interno ou demais documentos oficiais do condomínio.[file:1]
+</footer>
+
+<script>
+  document.querySelectorAll('.accordion-header').forEach(function(header) {
+    header.addEventListener('click', function() {
+      var item = this.parentElement;
+      var content = item.querySelector('.accordion-content');
+      var icon = this.querySelector('.toggle-icon');
+
+      if (item.classList.contains('active')) {
+        content.style.maxHeight = null;
+        item.classList.remove('active');
+        icon.textContent = '+';
+      } else {
+        document.querySelectorAll('.accordion-item').forEach(function(otherItem) {
+          if (otherItem !== item) {
+            otherItem.classList.remove('active');
+            var otherContent = otherItem.querySelector('.accordion-content');
+            var otherIcon = otherItem.querySelector('.toggle-icon');
+            if (otherContent) otherContent.style.maxHeight = null;
+            if (otherIcon) otherIcon.textContent = '+';
+          }
+        });
+
+        item.classList.add('active');
+        content.style.maxHeight = content.scrollHeight + 'px';
+        icon.textContent = '−';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

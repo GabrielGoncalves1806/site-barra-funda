@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "level": "alto",
+    "title": "Cadastre-se no Portal Winker",
+    "text": "Todos os moradores devem se cadastrar no app Winker para acesso ao condomínio, reservas de áreas comuns e comunicados oficiais.",
+    "date": "Janeiro de 2026",
+    "author": "Administração"
+  },
+  {
+    "id": 2,
+    "level": "alerta",
+    "title": "Horário de silêncio",
+    "text": "Seg-Sex: 22h às 07h | Sáb, Dom e Feriados: 22h às 08h. Respeite seus vizinhos e evite ruídos excessivos.",
+    "date": "Janeiro de 2026",
+    "author": "Síndico"
+  },
+  {
+    "id": 3,
+    "level": "normal",
+    "title": "Lavanderia Laundry Express",
+    "text": "Use o app Laundry Express para reservar máquinas. Retire suas roupas imediatamente após o ciclo para não atrasar outros moradores.",
+    "date": "Janeiro de 2026",
+    "author": "Administração"
+  }
+]

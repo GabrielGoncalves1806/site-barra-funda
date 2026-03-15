@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bem-vindo ao Condomínio Plano Estação Barra Funda</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 40px 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .emoji {
+            font-size: 3em;
+            margin: 20px 0;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .card-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .info-box {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #764ba2;
+        }
+
+        .info-box strong {
+            color: #764ba2;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .step {
+            background: #f0f4ff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .contacts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .contact-item {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .contact-item strong {
+            color: #856404;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .contact-item a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .rules {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .rule-item {
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .rule-item.allow {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .rule-item.deny {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .icon {
+            font-size: 1.5em;
+            min-width: 30px;
+        }
+
+        .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 15px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .button:hover {
+            background: #764ba2;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b6b;
+            margin: 20px 0;
+        }
+
+        .highlight strong {
+            color: #856404;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        table th, table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .checklist li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        footer {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        footer p {
+            color: #666;
+            margin: 10px 0;
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .nav-tabs button {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .nav-tabs button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .nav-tabs button:hover {
+            border-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .card-content {
+                grid-template-columns: 1fr;
+            }
+
+            .contacts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .rules {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="emoji">🏠</div>
+            <h1>Bem-vindo ao Condomínio!</h1>
+            <p>Plano & Plano Estação Barra Funda</p>
+            <p style="margin-top: 15px; color: #999;">Seu guia prático para se integrar à nossa comunidade</p>
+        </header>
+
+        <!-- SEÇÃO 1: PRIMEIRO ACESSO -->
+        <div class="card">
+            <div class="emoji">📱</div>
+            <h2>Primeiro Acesso: Portal Winker</h2>
+            <p>Sua porta de entrada para gerenciar tudo no condomínio!</p>
+
+            <div style="margin-top: 20px;">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div><strong>Instale o App</strong><br>Procure por "Winker" no Google Play ou App Store</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div><strong>Clique em "Quero me cadastrar"</strong><br>Digite seu melhor e-mail</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div><strong>Localize o condomínio</strong><br>CEP: 88095-001 | Nº: 366</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div><strong>Confirme seus dados</strong><br>Bloco, apartamento, nome completo</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div><strong>Pronto!</strong><br>Aguarde aprovação por e-mail</div>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <strong>💡 Dica:</strong> Guarde bem seu login e senha — você usará constantemente!
+            </div>
+        </div>
+
+        <!-- SEÇÃO 2: RECONHECIMENTO FACIAL -->
+        <div class="card">
+            <div class="emoji">🔐</div>
+            <h2>Cadastro de Reconhecimento Facial</h2>
+            <p>Maior segurança e praticidade na entrada do condomínio</p>
+
+            <div class="card-content" style="margin-top: 20px;">
+                <div class="info-box">
+                    <strong>Documentos necessários:</strong>
+                    <ul class="checklist">
+                        <li>Foto 3x4 (fundo branco, sem boné)</li>
+                        <li>RG</li>
+                        <li>CPF</li>
+                        <li>Nome completo</li>
+                        <li>Nº da unidade (bloco + apto)</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <strong>Envie um e-mail para:</strong>
+                    <p style="margin-top: 10px;">
+                        📧 <a href="mailto:everton.moraees@gmail.com" style="color: #667eea;">everton.moraees@gmail.com</a><br><br>
+                        📧 <a href="mailto:jessica.voltane@oma.com.br" style="color: #667eea;">jessica.voltane@oma.com.br</a>
+                    </p>
+                    <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                        ⚠️ Você deve estar cadastrado no Portal Winker primeiro!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO 3: OUTROS MORADORES -->
+        <div class="card">
+            <div class="emoji">👥</div>
+            <h2>Cadastrando Outros Moradores</h2>
+            <p>Cônjuge, filhos ou outras pessoas na sua unidade</p>
+
+            <div style="margin-top: 20px;">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div><strong>Menu do app</strong> → Canto superior direito</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div><strong>Selecione "Outros Usuários"</strong></div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div><strong>Clique "+ ADICIONAR USUÁRIO"</strong></div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div><strong>Preencha:</strong> Nome, Sobrenome, E-mail, Descrição (cônjuge/filho/etc)</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div><strong>Salve!</strong> A senha será enviada para o e-mail</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO 4: ÁREAS COMUNS -->
+        <div class="card">
+            <div class="emoji">🎉</div>
+            <h2>Áreas Comuns</h2>
+            <p>Conheça os espaços incríveis para lazer e convivência</p>
+
+            <div style="margin-top: 20px;">
+                <div class="info-box">
+                    <strong>🎊 Salão de Festas</strong>
+                    <p>Até 30 pessoas | Dom-Qui: 10h-22h | Sex-Sab: 10h-23h | Taxa: 6 salários mínimos</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>🍖 Churrasqueira</strong>
+                    <p>Até 15 pessoas | Todos os dias: 10h-22h | Taxa: 5 salários mínimos</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>💪 Academia</strong>
+                    <p>24 horas | Exclusivo para condôminos | Roupas e tênis obrigatórios</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>🧺 Lavanderia Laundry Express</strong>
+                    <p>App disponível | Máquinas inteligentes | Pague por uso</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>🎠 Playground</strong>
+                    <p>Crianças até 10 anos | 8h-22h todos os dias</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>🖥️ Coworking</strong>
+                    <p>Profissionais | Máximo 3 convidados | Reserve no app</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>🐾 Espaço Pet</strong>
+                    <p>Necessidades fisiológicas | 24 horas | Você limpa após</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>🚴 Bicicletário</strong>
+                    <p>1 bicicleta por unidade | Cadeado obrigatório</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO 5: LAVANDERIA -->
+        <div class="card">
+            <div class="emoji">🧺</div>
+            <h2>Lavanderia - Laundry Express</h2>
+            <p>Sistema moderno e prático para sua roupa</p>
+
+            <div style="margin-top: 20px;">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div><strong>Instale o app "Laundry Express"</strong><br>Google Play ou App Store</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div><strong>Acesse: https://laundryexpress.com.br/#/login</strong><br>Clique em "Cadastre-se"</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div><strong>Ative seu acesso</strong><br>Verifique cartão/QR Code na lavanderia</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div><strong>Use o app para reservar máquina</strong><br>Selecione, libere e aguarde ciclo terminar</div>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <strong>📌 Regras:</strong> Deixe limpo para o próximo | Não abandone roupas | Informe problemas pelo app
+            </div>
+        </div>
+
+        <!-- SEÇÃO 6: CONVIVÊNCIA -->
+        <div class="card">
+            <div class="emoji">🤐</div>
+            <h2>Silêncio e Convivência</h2>
+            <p>Somos uma comunidade - cuidado para não incomodar</p>
+
+            <div style="margin-top: 20px;">
+                <table>
+                    <tr>
+                        <th>Período</th>
+                        <th>Horário de Silêncio</th>
+                    </tr>
+                    <tr>
+                        <td>Seg-Sex</td>
+                        <td>22h00 às 07h00</td>
+                    </tr>
+                    <tr>
+                        <td>Sab, Dom e Feriados</td>
+                        <td>22h00 às 08h00</td>
+                    </tr>
+                </table>
+
+                <p style="margin: 20px 0; font-weight: bold;">❌ Proibido sempre:</p>
+                <div class="rules">
+                    <div class="rule-item deny">
+                        <div class="icon">📦</div>
+                        <div>Arrastar móveis à noite</div>
+                    </div>
+                    <div class="rule-item deny">
+                        <div class="icon">🔊</div>
+                        <div>Música ou TV altas</div>
+                    </div>
+                    <div class="rule-item deny">
+                        <div class="icon">🎸</div>
+                        <div>Instrumentos musicais</div>
+                    </div>
+                    <div class="rule-item deny">
+                        <div class="icon">🔨</div>
+                        <div>Obras fora de horário</div>
+                    </div>
+                    <div class="rule-item deny">
+                        <div class="icon">🎉</div>
+                        <div>Festas que perturbem</div>
+                    </div>
+                    <div class="rule-item deny">
+                        <div class="icon">🚪</div>
+                        <div>Odores por portas abertas</div>
+                    </div>
+                </div>
+
+                <p style="margin: 20px 0; font-weight: bold;">✅ Horários permitidos para obras:</p>
+                <div class="rules">
+                    <div class="rule-item allow">
+                        <div class="icon">📅</div>
+                        <div><strong>Seg-Sex:</strong> 8h00 às 17h00</div>
+                    </div>
+                    <div class="rule-item allow">
+                        <div class="icon">📅</div>
+                        <div><strong>Sábado:</strong> 9h00 às 12h00</div>
+                    </div>
+                    <div class="rule-item deny">
+                        <div class="icon">📅</div>
+                        <div><strong>Dom e Feriados:</strong> PROIBIDO</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <strong>Regra de Ouro:</strong> O que incomoda você incomoda o vizinho. Pequenas atitudes = comunidade harmoniosa!
+            </div>
+        </div>
+
+        <!-- SEÇÃO 7: SEGURANÇA & CONTATOS -->
+        <div class="card">
+            <div class="emoji">🔐</div>
+            <h2>Segurança & Contatos</h2>
+            <p>Mantenha estes números sempre à mão</p>
+
+            <div style="margin-top: 20px;">
+                <p style="margin-bottom: 20px;"><strong>📞 CONTATOS DO CONDOMÍNIO:</strong></p>
+                <div class="contacts-grid">
+                    <div class="contact-item">
+                        <strong>🚪 Portaria/Controle</strong>
+                        <a href="tel:+5511963350837">+55 11 96335-0837</a>
+                        <small>24 horas</small>
+                    </div>
+                    <div class="contact-item">
+                        <strong>🔧 Zeladoria</strong>
+                        <a href="tel:+5511963370153">+55 11 96337-0153</a>
+                        <small>Expediente</small>
+                    </div>
+                    <div class="contact-item">
+                        <strong>💼 Administração</strong>
+                        <a href="tel:+5511976506826">+55 11 97650-6826</a>
+                        <small>Expediente</small>
+                    </div>
+                    <div class="contact-item">
+                        <strong>👔 Síndico</strong>
+                        <a href="tel:+5513981500179">+55 13 98150-0179</a>
+                        <small>Horário comercial</small>
+                    </div>
+                    <div class="contact-item">
+                        <strong>🛒 Mercadinho</strong>
+                        <a href="tel:+5511999097730">+55 11 99909-7730</a>
+                        <small>Confira horário</small>
+                    </div>
+                </div>
+
+                <p style="margin: 25px 0 15px 0;"><strong>🚨 EMERGÊNCIAS:</strong></p>
+                <div class="contacts-grid">
+                    <div class="contact-item">
+                        <strong>🚒 Bombeiros</strong>
+                        <a href="tel:193">193</a>
+                    </div>
+                    <div class="contact-item">
+                        <strong>🚔 Polícia Militar</strong>
+                        <a href="tel:190">190</a>
+                    </div>
+                    <div class="contact-item">
+                        <strong>🚑 SAMU</strong>
+                        <a href="tel:192">192</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO 8: PRÓXIMOS PASSOS -->
+        <div class="card">
+            <div class="emoji">🎯</div>
+            <h2>Seus Próximos Passos</h2>
+            <p>Siga esta ordem para se integrar rapidamente</p>
+
+            <div style="margin-top: 20px;">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div><strong>HOJE:</strong> Cadastre-se no Portal Winker</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div><strong>AMANHÃ:</strong> Instale Laundry Express e cadastre-se na lavanderia</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div><strong>ESTA SEMANA:</strong> Visite o Mercadinho e as áreas comuns</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div><strong>QUANDO QUISER:</strong> Solicite cadastro de reconhecimento facial</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer>
+            <div class="emoji">🏡</div>
+            <h2 style="color: #667eea;">Bem-vindo, de Verdade!</h2>
+            <p>Estamos felizes em tê-lo como parte de nossa comunidade.</p>
+            <p>Este é um lugar onde vizinhos se respeitam, cuidam uns dos outros e constroem uma vida comunitária harmoniosa.</p>
+            <p style="margin-top: 20px; font-weight: bold; color: #667eea;">Se tiver dúvidas, não hesite em procurar a administração!</p>
+            <p style="margin-top: 30px; color: #999; font-size: 0.9em;">
+                Cartilha de Boas-Vindas | Condomínio Plano Estação Barra Funda<br>
+                Última atualização: Janeiro de 2026
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Script para melhorar interatividade (opcional)
+        console.log('Cartilha de Boas-Vindas carregada com sucesso!');
+    </script>
+</body>
+</html>

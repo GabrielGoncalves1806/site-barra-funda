@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Administração • Condomínio Plano&Estação</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .admin-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .admin-header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .admin-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .admin-tab {
+      padding: 12px 20px;
+      border: 1px solid rgba(255, 255, 255, .15);
+      background: rgba(255, 255, 255, .08);
+      color: var(--muted);
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all .2s ease;
+    }
+
+    .admin-tab.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .admin-section {
+      display: none;
+    }
+
+    .admin-section.active {
+      display: block;
+    }
+
+    .admin-card {
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .admin-card h3 {
+      margin: 0 0 16px;
+      font-size: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, .15);
+      background: rgba(255, 255, 255, .08);
+      color: white;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn-admin {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+
+    .btn-admin--primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+    }
+
+    .btn-admin--danger {
+      background: linear-gradient(135deg, #ff4757, #ff6b6b);
+      color: white;
+    }
+
+    .btn-admin--ghost {
+      background: rgba(255, 255, 255, .1);
+      color: var(--muted);
+      border: 1px solid rgba(255, 255, 255, .15);
+    }
+
+    .item-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 12px;
+      gap: 16px;
+    }
+
+    .item-row__info {
+      flex: 1;
+    }
+
+    .item-row__title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .item-row__meta {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .item-row__actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255, 255, 255, .1);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      transition: all .2s ease;
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, .2);
+      color: white;
+    }
+
+    .btn-icon--danger:hover {
+      background: rgba(255, 71, 87, .3);
+      color: #ff4757;
+    }
+
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 15, 40, .95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .login-box {
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .login-box h2 {
+      margin: 0 0 8px;
+    }
+
+    .login-box p {
+      color: var(--muted);
+      margin: 0 0 24px;
+    }
+
+    .login-error {
+      color: #ff4757;
+      font-size: 14px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 16px 24px;
+      background: var(--success);
+      color: white;
+      border-radius: 12px;
+      font-weight: 500;
+      box-shadow: 0 8px 30px rgba(40, 167, 69, .4);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all .3s ease;
+      z-index: 1001;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 640px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-tabs {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+      <h2>🔐 Área Restrita</h2>
+      <p>Acesso exclusivo para síndico e administração</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <input type="password" id="adminPassword" placeholder="Digite a senha" required />
+        </div>
+        <button type="submit" class="btn-admin btn-admin--primary" style="width: 100%;">Entrar</button>
+        <p class="login-error" id="loginError">Senha incorreta. Tente novamente.</p>
+      </form>
+    </div>
+  </div>
+
+  <div class="admin-container hidden" id="adminPanel">
+    <div class="admin-header">
+      <h1>⚙️ Painel de Administração</h1>
+      <button class="btn-admin btn-admin--ghost" onclick="logout()">Sair</button>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-admin-tab="notices">📢 Avisos</button>
+      <button class="admin-tab" data-admin-tab="sales">🛒 Vendas</button>
+    </div>
+
+    <!-- SEÇÃO AVISOS -->
+    <div class="admin-section active" id="section-notices">
+      <div class="admin-card">
+        <h3>Adicionar Novo Aviso</h3>
+        <form id="noticeForm">
+          <div class="form-group">
+            <label>Título</label>
+            <input type="text" id="noticeTitle" required placeholder="Ex: Manutenção do elevador" />
+          </div>
+          <div class="form-group">
+            <label>Mensagem</label>
+            <textarea id="noticeText" required placeholder="Descreva o aviso..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nível</label>
+              <select id="noticeLevel">
+                <option value="normal">Info (Normal)</option>
+                <option value="alerta">Atenção (Alerta)</option>
+                <option value="alto">Prioridade (Alto)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Autor</label>
+              <input type="text" id="noticeAuthor" value="Síndico" />
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn-admin btn-admin--primary">Adicionar Aviso</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="admin-card">
+        <h3>Avisos Cadastrados</h3>
+        <div class="item-list" id="noticesList"></div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO VENDAS -->
+    <div class="admin-section" id="section-sales">
+      <div class="admin-card">
+        <h3>Adicionar Novo Produto</h3>
+        <form id="saleForm">
+          <div class="form-group">
+            <label>Nome do Produto</label>
+            <input type="text" id="saleTitle" required placeholder="Ex: Bolo de Pote" />
+          </div>
+          <div class="form-group">
+            <label>Descrição</label>
+            <textarea id="saleDescription" required placeholder="Descreva o produto..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Preço</label>
+              <input type="text" id="salePrice" required placeholder="Ex: R$ 15,00" />
+            </div>
+            <div class="form-group">
+              <label>WhatsApp (com DDD)</label>
+              <input type="text" id="saleWhatsapp" required placeholder="Ex: 5511999999999" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Vendedor (Nome e Apto)</label>
+              <input type="text" id="saleSeller" required placeholder="Ex: Maria - Bloco A, Apto 102" />
+            </div>
+            <div class="form-group">
+              <label>URL da Imagem</label>
+              <input type="text" id="saleImage" placeholder="Ex: assets/sales/bolo.jpg" />
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn-admin btn-admin--primary">Adicionar Produto</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="admin-card">
+        <h3>Produtos Cadastrados</h3>
+        <div class="item-list" id="salesList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Salvo com sucesso!</div>
+
+  <script>
+    const ADMIN_PASSWORD = 'sindico2026';
+    let notices = [];
+    let sales = [];
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function checkAuth() {
+      const auth = localStorage.getItem('admin_auth');
+      if (auth === 'true') {
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        loadData();
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('admin_auth');
+      location.reload();
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const pwd = document.getElementById('adminPassword').value;
+      if (pwd === ADMIN_PASSWORD) {
+        localStorage.setItem('admin_auth', 'true');
+        checkAuth();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    });
+
+    document.querySelectorAll('[data-admin-tab]').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('section-' + tab.dataset.adminTab).classList.add('active');
+      });
+    });
+
+    async function loadData() {
+      try {
+        const [noticesRes, salesRes] = await Promise.all([
+          fetch('data/notices.json'),
+          fetch('data/sales.json')
+        ]);
+        notices = await noticesRes.json();
+        sales = await salesRes.json();
+        renderNoticesList();
+        renderSalesList();
+      } catch (err) {
+        console.error('Erro ao carregar dados:', err);
+      }
+    }
+
+    function renderNoticesList() {
+      const list = document.getElementById('noticesList');
+      if (!notices.length) {
+        list.innerHTML = '<p style="color: var(--muted);">Nenhum aviso cadastrado.</p>';
+        return;
+      }
+      list.innerHTML = notices.map((n, i) => `
+        <div class="item-row">
+          <div class="item-row__info">
+            <div class="item-row__title">${n.title}</div>
+            <div class="item-row__meta">${n.level.toUpperCase()} • ${n.author} • ${n.date}</div>
+          </div>
+          <div class="item-row__actions">
+            <button class="btn-icon btn-icon--danger" onclick="deleteNotice(${i})" title="Excluir">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderSalesList() {
+      const list = document.getElementById('salesList');
+      if (!sales.length) {
+        list.innerHTML = '<p style="color: var(--muted);">Nenhum produto cadastrado.</p>';
+        return;
+      }
+      list.innerHTML = sales.map((s, i) => `
+        <div class="item-row">
+          <div class="item-row__info">
+            <div class="item-row__title">${s.title} - ${s.price}</div>
+            <div class="item-row__meta">${s.seller} • ${s.active ? '✅ Ativo' : '❌ Inativo'}</div>
+          </div>
+          <div class="item-row__actions">
+            <button class="btn-icon" onclick="toggleSale(${i})" title="${s.active ? 'Desativar' : 'Ativar'}">${s.active ? '⏸️' : '▶️'}</button>
+            <button class="btn-icon btn-icon--danger" onclick="deleteSale(${i})" title="Excluir">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('noticeForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const newNotice = {
+        id: Date.now(),
+        title: document.getElementById('noticeTitle').value,
+        text: document.getElementById('noticeText').value,
+        level: document.getElementById('noticeLevel').value,
+        author: document.getElementById('noticeAuthor').value,
+        date: new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+      };
+      notices.unshift(newNotice);
+      saveNotices();
+      e.target.reset();
+      document.getElementById('noticeAuthor').value = 'Síndico';
+    });
+
+    document.getElementById('saleForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const newSale = {
+        id: Date.now(),
+        title: document.getElementById('saleTitle').value,
+        description: document.getElementById('saleDescription').value,
+        price: document.getElementById('salePrice').value,
+        whatsapp: document.getElementById('saleWhatsapp').value.replace(/\D/g, ''),
+        seller: document.getElementById('saleSeller').value,
+        image: document.getElementById('saleImage').value || 'assets/placeholder-sale.jpg',
+        active: true
+      };
+      sales.unshift(newSale);
+      saveSales();
+      e.target.reset();
+    });
+
+    function deleteNotice(index) {
+      if (confirm('Deseja realmente excluir este aviso?')) {
+        notices.splice(index, 1);
+        saveNotices();
+      }
+    }
+
+    function deleteSale(index) {
+      if (confirm('Deseja realmente excluir este produto?')) {
+        sales.splice(index, 1);
+        saveSales();
+      }
+    }
+
+    function toggleSale(index) {
+      sales[index].active = !sales[index].active;
+      saveSales();
+    }
+
+    function saveNotices() {
+      downloadJSON('notices.json', notices);
+      renderNoticesList();
+      showToast('Avisos atualizados! Faça o upload do arquivo.');
+    }
+
+    function saveSales() {
+      downloadJSON('sales.json', sales);
+      renderSalesList();
+      showToast('Vendas atualizadas! Faça o upload do arquivo.');
+    }
+
+    function downloadJSON(filename, data) {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    checkAuth();
+  </script>
+</body>
+
+</html>

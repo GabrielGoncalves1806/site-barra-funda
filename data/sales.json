@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "title": "Bolo de Pote - Brigadeiro",
+    "description": "Delicioso bolo de pote caseiro sabor brigadeiro. Feito com ingredientes de qualidade!",
+    "price": "R$ 12,00",
+    "image": "assets/sales/bolo-pote.jpg",
+    "seller": "Maria - Bloco A, Apto 102",
+    "whatsapp": "5511999999999",
+    "active": true
+  },
+  {
+    "id": 2,
+    "title": "Salgados para Festa",
+    "description": "Cento de salgados variados: coxinha, bolinha de queijo e risole. Encomende com antecedência!",
+    "price": "R$ 45,00 (cento)",
+    "image": "assets/sales/salgados.jpg",
+    "seller": "João - Bloco B, Apto 305",
+    "whatsapp": "5511988888888",
+    "active": true
+  },
+  {
+    "id": 3,
+    "title": "Marmitas Fitness",
+    "description": "Marmitas saudáveis com proteína, carboidrato e salada. Ideal para quem treina!",
+    "price": "R$ 18,00",
+    "image": "assets/sales/marmita.jpg",
+    "seller": "Ana - Bloco C, Apto 201",
+    "whatsapp": "5511977777777",
+    "active": true
+  }
+]
