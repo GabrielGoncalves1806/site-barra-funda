@@ -25,6 +25,57 @@ document.querySelectorAll('[data-tab]').forEach(btn => {
   });
 });
 
+// ===== BUSCA GLOBAL =====
+const SEARCH_MAP = [
+  { keywords: ["hospital", "hospitais", "emergencia"], tab: "contatos", target: "#contatos" },
+  { keywords: ["contato", "telefone", "ramal", "portaria"], tab: "contatos", target: "#contatos" },
+  { keywords: ["aviso", "documento", "regulamento", "atas"], tab: "documentos", target: "#documentos" },
+  { keywords: ["venda", "produto", "anuncio"], tab: "vendas", target: "[data-sales-root]" },
+  { keywords: ["novo", "cadastro", "morador"], tab: "novo-morador", target: "#novo-morador" },
+  { keywords: ["faq", "duvida", "pergunta", "regras"], tab: "faq", target: "#tab-faq .faq" },
+  { keywords: ["portaria", "entrega"], tab: "faq", target: "#faq-portaria" },
+  { keywords: ["aluguel", "temporada"], tab: "faq", target: "#faq-aluguel" },
+  { keywords: ["animal", "pet"], tab: "faq", target: "#faq-animais" },
+  { keywords: ["churrasqueira"], tab: "faq", target: "#faq-churrasqueira" },
+  { keywords: ["fumar", "cigarro"], tab: "faq", target: "#faq-fumar" },
+  { keywords: ["reclamacao", "sugestao"], tab: "faq", target: "#faq-reclamacao" },
+  { keywords: ["visitante", "visita"], tab: "faq", target: "#faq-visitantes" },
+  { keywords: ["area", "churrasqueira", "academia", "coworking", "espaco"], tab: "areas", target: "#tab-areas" }
+];
+
+function highlightAndScroll(selector) {
+  if (!selector) return;
+  const el = document.querySelector(selector);
+  if (!el) return;
+  el.classList.add("search-hit");
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => el.classList.remove("search-hit"), 1800);
+}
+
+const searchForm = document.querySelector("#siteSearchForm");
+const searchInput = document.querySelector("#siteSearchInput");
+
+if (searchForm && searchInput) {
+  searchForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const term = searchInput.value.trim().toLowerCase();
+    if (!term) return;
+
+    const match = SEARCH_MAP.find(entry =>
+      entry.keywords.some(keyword => term.includes(keyword))
+    );
+
+    if (match) {
+      showTab(match.tab);
+      setTimeout(() => highlightAndScroll(match.target), 150);
+    } else {
+      alert("Não encontrei resultados para sua busca. Tente palavras como 'hospital', 'avisos' ou 'vendas'.");
+    }
+
+    searchInput.blur();
+  });
+}
+
 // ===== MODAL ÁREAS COMUNS =====
 const AREA_DETAILS = {
   academia: {
