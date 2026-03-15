@@ -678,6 +678,10 @@ h1 {
   margin-top: 32px;
 }
 
+.hero__areas--full {
+  grid-column: 1 / -1;
+}
+
 .areas-title {
   margin: 0 0 8px;
   font-size: 24px;
@@ -695,7 +699,7 @@ h1 {
 
 .areas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(8, minmax(110px, 1fr));
   gap: 12px;
 }
 
@@ -1373,7 +1377,7 @@ textarea:focus {
   }
 
   .areas-grid {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(8, minmax(100px, 1fr));
   }
 
   .welcome-card {
@@ -1461,7 +1465,7 @@ textarea:focus {
 
 @media (max-width: 640px) {
   .areas-grid {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(4, minmax(100px, 1fr));
   }
 
   .areas-title {
