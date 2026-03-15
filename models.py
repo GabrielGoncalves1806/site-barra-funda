@@ -7,9 +7,9 @@ from sqlmodel import SQLModel, Field
 class NoticeBase(SQLModel):
     title: str
     text: str
-    level: str = "normal"
-    author: str = "Síndico"
-    date: str = ""
+    level: str = Field(default="normal")
+    author: str = Field(default="Síndico")
+    date: str = Field(default="")
 
 
 class Notice(NoticeBase, table=True):
@@ -34,10 +34,10 @@ class SaleBase(SQLModel):
     title: str
     description: str
     price: str
-    image: str = "/static/assets/placeholder-sale.jpg"
+    image: str = Field(default="/static/assets/placeholder-sale.jpg")
     seller: str
     whatsapp: str
-    active: bool = True
+    active: bool = Field(default=True)
 
 
 class Sale(SaleBase, table=True):
@@ -63,13 +63,13 @@ class SaleUpdate(SQLModel):
 class AreaBase(SQLModel):
     title: str
     slug: str
-    tag: str = ""
-    description: str = ""
-    image: str = ""
-    highlights: str = "[]"
-    meta: str = "[]"
-    rules: str = "[]"
-    display_order: int = 0
+    tag: str = Field(default="")
+    description: str = Field(default="")
+    image: str = Field(default="")
+    highlights: str = Field(default="[]")
+    meta: str = Field(default="[]")
+    rules: str = Field(default="[]")
+    display_order: int = Field(default=0)
 
 
 class Area(AreaBase, table=True):
@@ -96,9 +96,9 @@ class AreaUpdate(SQLModel):
 class FAQBase(SQLModel):
     question: str
     answer: str
-    icon: str = "❓"
-    anchor_id: str = ""
-    display_order: int = 0
+    icon: str = Field(default="❓")
+    anchor_id: str = Field(default="")
+    display_order: int = Field(default=0)
 
 
 class FAQ(FAQBase, table=True):
