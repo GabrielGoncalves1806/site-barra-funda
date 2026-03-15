@@ -1,0 +1,114 @@
+<!-- ABA CONTATOS -->
+<div class="tab-content" id="tab-contatos">
+  <section id="contatos" class="section">
+    <div class="container">
+      <div class="section__head">
+        <h2>Contatos</h2>
+        <p>
+          Endereço: Av. Thomas Edison, 944 — Barra Funda, São Paulo/SP.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Telefones e e-mails</h3>
+          <div class="contact-list">
+            <div class="contact">
+              <div class="contact__k">Portaria 24h</div>
+              <div class="contact__v">(11) 96335-0837</div>
+            </div>
+            <div class="contact">
+              <div class="contact__k">Zeladoria</div>
+              <div class="contact__v">(11) 96337-0153</div>
+            </div>
+            <div class="contact">
+              <div class="contact__k">Administração</div>
+              <div class="contact__v">(11) 97650-6826</div>
+            </div>
+            <div class="contact">
+              <div class="contact__k">Síndico</div>
+              <div class="contact__v">(13) 98150-0179</div>
+            </div>
+            <div class="contact">
+              <div class="contact__k">Mercadinho</div>
+              <div class="contact__v">(11) 99909-7730</div>
+            </div>
+            <div class="contact">
+              <div class="contact__k">SAMU / Bombeiros / Polícia</div>
+              <div class="contact__v">192 / 193 / 190</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3>Enviar solicitação</h3>
+          <form class="form" id="requestForm">
+            <label>
+              Assunto
+              <input required name="subject" placeholder="Ex.: Manutenção, barulho, reserva de área..." />
+            </label>
+            <label>
+              Mensagem
+              <textarea required name="message" rows="4" placeholder="Descreva sua solicitação..."></textarea>
+            </label>
+            <button class="btn btn--primary" type="submit">Gerar mensagem</button>
+            <p class="form__hint">Este botão não envia e-mail sozinho: ele gera um texto pronto para você copiar e
+              mandar no WhatsApp/e-mail.</p>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h3>Localização</h3>
+          <p class="muted">
+            Para evitar dependências, deixei um botão que abre o mapa no Google. Você pode substituir por um iframe
+            do
+            Google Maps (Embed) depois.
+          </p>
+          <a class="btn btn--ghost" target="_blank" rel="noreferrer"
+            href="https://www.google.com/maps/search/?api=1&query=Av.%20Thomas%20Edison%2C%20944%20-%20Barra%20Funda%2C%20S%C3%A3o%20Paulo%20-%20SP">
+            Abrir no Google Maps
+          </a>
+
+          <div class="map-placeholder" aria-hidden="true">
+            <div class="map-placeholder__pin">📍</div>
+            <div class="map-placeholder__text">
+              Av. Thomas Edison, 944<br />
+              Barra Funda • São Paulo/SP
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3>Hospitais e emergências próximos</h3>
+          <div class="hospital-cards">
+            <a class="hospital-card" target="_blank" rel="noreferrer"
+              href="https://www.google.com/maps/place/R.+Vitorino+Carmilo,+717+-+Barra+Funda,+São+Paulo+-+SP,+01153-000">
+              <div class="hospital-card__icon">🏥</div>
+              <div>
+                <h4>PS Municipal Barra Funda</h4>
+                <p class="hospital-card__tag">Público | Municipal • 24h</p>
+                <p class="hospital-card__meta">R. Vitorino Carmilo, 717 — (11) 3826-5666 / (11) 4210-5425</p>
+              </div>
+            </a>
+
+            <a class="hospital-card" target="_blank" rel="noreferrer"
+              href="https://www.google.com/maps/place/Av.+Dr.+Abraão+Ribeiro,+283+-+Barra+Funda,+São+Paulo+-+SP,+01133-000">
+              <div class="hospital-card__icon">🏥</div>
+              <div>
+                <h4>Centro de Saúde Escola Barra Funda (Santa Casa)</h4>
+                <p class="hospital-card__tag">Público | Municipal • 07h às 17h</p>
+                <p class="hospital-card__meta">Av. Dr. Abraão Ribeiro, 283 — (11) 3466-2500</p>
+              </div>
+            </a>
+          </div>
+
+          <p class="hospital-list__hint">Fontes: <a target="_blank" rel="noreferrer"
+              href="https://www.estacaobarrafunda.com/hospitais-e-emerg%C3%AAncias-pr%C3%B3ximos">Estação Barra
+              Funda</a> e sites oficiais.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% include "partials/_footer.html" %}
+</div>

@@ -1,0 +1,153 @@
+<!-- ABA ÁREAS COMUNS -->
+<div class="tab-content" id="tab-areas">
+  <section id="areas" class="section">
+    <div class="container">
+      <div class="section__head">
+        <h2>Áreas Comuns</h2>
+        <p>
+          Conheça os espaços de lazer e convivência do condomínio. Faça reservas pelo app Winker.
+        </p>
+      </div>
+
+      <div class="cards">
+        <article class="card" data-area-detail="academia" role="button" tabindex="0"
+          aria-label="Ver detalhes da Academia">
+          <img src="/static/assets/area-academia.jpg" alt="Academia" loading="lazy" />
+          <div class="card__body">
+            <h3>Academia</h3>
+            <ul>
+              <li>Acesso 24h via reconhecimento facial.</li>
+              <li>Exclusivo para moradores cadastrados.</li>
+              <li>Uso obrigatório de toalha e tênis.</li>
+              <li>Limpe e organize os equipamentos.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card" data-area-detail="salao" role="button" tabindex="0"
+          aria-label="Ver detalhes do Salão de Festas">
+          <img src="/static/assets/area-salao.jpg" alt="Salão de festas" loading="lazy" />
+          <div class="card__body">
+            <h3>Salão de Festas</h3>
+            <ul>
+              <li>Capacidade para 30 pessoas.</li>
+              <li>Dom-qui 10h-22h | Sex/sáb 10h-23h.</li>
+              <li>Reserva no app Winker (48h).</li>
+              <li>Taxa: 6% do salário mínimo.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card" data-area-detail="lavanderia" role="button" tabindex="0"
+          aria-label="Ver detalhes da Lavanderia">
+          <img src="/static/assets/area-lavanderia.jpg" alt="Lavanderia" loading="lazy" />
+          <div class="card__body">
+            <h3>Lavanderia Laundry Express</h3>
+            <ul>
+              <li>Operação 24h com o app Laundry Express.</li>
+              <li>Reserve máquinas e pague por uso.</li>
+              <li>Retire as peças ao fim do ciclo.</li>
+              <li>Informe falhas pelo aplicativo.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card" data-area-detail="playground" role="button" tabindex="0"
+          aria-label="Ver detalhes do Playground">
+          <img src="/static/assets/area-playground.jpg" alt="Playground" loading="lazy" />
+          <div class="card__body">
+            <h3>Playground</h3>
+            <ul>
+              <li>Para crianças até 10 anos.</li>
+              <li>Horário diário: 8h às 22h.</li>
+              <li>Sob supervisão de um responsável.</li>
+              <li>Organize e guarde os brinquedos.</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <div class="cards" style="margin-top: 18px;">
+        <article class="card" data-area-detail="churrasqueira" role="button" tabindex="0"
+          aria-label="Ver detalhes da Churrasqueira">
+          <img src="/static/assets/area-churrasqueira.jpg" alt="Churrasqueira" loading="lazy" />
+          <div class="card__body">
+            <h3>Churrasqueira</h3>
+            <ul>
+              <li>Capacidade máxima: 15 pessoas.</li>
+              <li>Funcionamento diário 10h-22h.</li>
+              <li>Reserva pelo app Winker (48h).</li>
+              <li>Taxa: 5% do salário mínimo.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card" data-area-detail="coworking" role="button" tabindex="0"
+          aria-label="Ver detalhes do Coworking">
+          <img src="/static/assets/area-coworking.jpg" alt="Coworking" loading="lazy" />
+          <div class="card__body">
+            <h3>Coworking</h3>
+            <ul>
+              <li>Ambiente climatizado e Wi-Fi.</li>
+              <li>Horário: 7h às 22h.</li>
+              <li>Máx. 3 convidados por unidade.</li>
+              <li>Use fones e mantenha silêncio.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card" data-area-detail="espaco-pet" role="button" tabindex="0"
+          aria-label="Ver detalhes do Espaço Pet">
+          <img src="/static/assets/area-pet.jpg" alt="Espaço Pet" loading="lazy" />
+          <div class="card__body">
+            <h3>Espaço Pet</h3>
+            <ul>
+              <li>Funcionamento 24h.</li>
+              <li>Use para necessidades dos pets.</li>
+              <li>Somente animais vacinados e em coleira.</li>
+              <li>Recolha os resíduos imediatamente.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card" data-area-detail="bicicletario" role="button" tabindex="0"
+          aria-label="Ver detalhes do Bicicletário">
+          <img src="/static/assets/area-bicicletario.jpg" alt="Bicicletário" loading="lazy" />
+          <div class="card__body">
+            <h3>Bicicletário</h3>
+            <ul>
+              <li>1 bicicleta por unidade cadastrada.</li>
+              <li>Cadeado obrigatório.</li>
+              <li>Identifique com bloco e apartamento.</li>
+              <li>Não deixe acessórios ou caixas soltas.</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <div class="callout">
+        <div class="callout__title">Mercadinho</div>
+        <p>
+          O condomínio conta com um mercadinho de autoatendimento. Contato: (11) 99909-7730.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="modal" id="areaModal" aria-hidden="true">
+    <div class="modal__overlay" data-modal-close></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="areaModalTitle" tabindex="-1">
+      <button class="modal__close" type="button" data-modal-close aria-label="Fechar">×</button>
+      <img src="" alt="" class="modal__image" id="areaModalImage" />
+      <div class="modal__body">
+        <p class="modal__tag" id="areaModalTag"></p>
+        <h3 id="areaModalTitle"></h3>
+        <p id="areaModalDescription" class="modal__description"></p>
+        <ul id="areaModalHighlights" class="modal__list"></ul>
+        <div id="areaModalMeta" class="modal__meta"></div>
+      </div>
+    </div>
+  </div>
+
+  {% include "partials/_footer.html" %}
+</div>

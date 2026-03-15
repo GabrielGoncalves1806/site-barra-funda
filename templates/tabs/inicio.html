@@ -1,0 +1,173 @@
+<!-- ABA INÍCIO -->
+<div class="tab-content active" id="tab-inicio">
+  <section class="hero">
+    <div class="container hero__grid">
+      <div class="hero__copy">
+        <div class="hero-header">
+          <p class="pill">📌 Condomínio Plano&Estação Barra Funda</p>
+          <button class="pill-novo-morador-btn" data-tab="novo-morador">
+            <span class="pill-btn-icon">🏠</span>
+            <span class="pill-btn-text">Novo Morador</span>
+            <span class="pill-btn-badge">NOVO</span>
+          </button>
+        </div>
+        <h1>Tela de Novo Morador</h1>
+        <p class="lead">
+          Seu guia completo para se integrar à nossa comunidade. Encontre avisos, regras, documentos, contatos e
+          informações das áreas comuns.
+        </p>
+
+        <div class="hero__actions">
+          <button class="btn btn--primary" data-tab="documentos">Ver documentos/avisos</button>
+          <button class="btn btn--ghost" data-tab="documentos">Abrir documentos/avisos</button>
+        </div>
+
+        <form id="siteSearchForm" class="hero-search" autocomplete="off">
+          <label class="sr-only" for="siteSearchInput">Buscar informações no portal</label>
+          <div class="hero-search__field">
+            <span class="hero-search__icon">🔎</span>
+            <input id="siteSearchInput" type="text" name="search"
+              placeholder="O que você precisa? Ex: hospital, avisos, vendas" required />
+            <button class="btn btn--primary" type="submit">Buscar</button>
+          </div>
+          <p class="hero-search__hint">Digite palavras-chave como "hospital", "documentos", "churrasqueira" ou "novo
+            morador".</p>
+        </form>
+
+        <div class="hero__info">
+          <div class="info-card">
+            <span class="info-card__label">Endereço</span>
+            <span class="info-card__value">Av. Thomas Edison, 944 • Barra Funda • São Paulo/SP</span>
+            <span class="info-card__hint">Baseado em fontes públicas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero__media">
+        <div class="slider" aria-label="Galeria de áreas comuns">
+          <img class="slider__img is-active" src="/static/assets/area-academia.jpg" alt="Academia equipada"
+            loading="eager" />
+          <img class="slider__img" src="/static/assets/area-salao.jpg" alt="Salão de festas preparado" loading="lazy" />
+          <img class="slider__img" src="/static/assets/area-coworking.jpg" alt="Espaço de coworking" loading="lazy" />
+          <img class="slider__img" src="/static/assets/area-pet.jpg" alt="Espaço pet com gramado" loading="lazy" />
+
+          <div class="slider__controls">
+            <button class="icon-btn" type="button" data-slider="prev" aria-label="Imagem anterior">‹</button>
+            <button class="icon-btn" type="button" data-slider="next" aria-label="Próxima imagem">›</button>
+          </div>
+
+          <div class="slider__dots" role="tablist" aria-label="Selecionar imagem"></div>
+        </div>
+      </div>
+
+      <div class="hero__areas hero__areas--full">
+        <h3 class="areas-title">Áreas do Condomínio</h3>
+        <p class="areas-subtitle">Clique em cada área para ver as normas de uso, horários, capacidade e
+          orientações importantes</p>
+        <div class="areas-grid">
+          <button class="area-card" data-tab="areas" data-area="espaco-pet">
+            <span class="area-icon">🐾</span>
+            <span class="area-name">Espaço Pet</span>
+          </button>
+          <button class="area-card" data-tab="areas" data-area="lavanderia">
+            <span class="area-icon">🧺</span>
+            <span class="area-name">Lavanderia</span>
+          </button>
+          <button class="area-card" data-tab="areas" data-area="coworking">
+            <span class="area-icon">💼</span>
+            <span class="area-name">Coworking</span>
+          </button>
+          <button class="area-card" data-tab="areas" data-area="salao">
+            <span class="area-icon">🎉</span>
+            <span class="area-name">Salão de Festas</span>
+          </button>
+          <button class="area-card" data-tab="areas" data-area="churrasqueira">
+            <span class="area-icon">🍖</span>
+            <span class="area-name">Churrasqueira</span>
+          </button>
+          <button class="area-card" data-tab="areas" data-area="academia">
+            <span class="area-icon">🏋️</span>
+            <span class="area-name">Academia</span>
+          </button>
+          <button class="area-card" data-tab="areas" data-area="mercadinho">
+            <span class="area-icon">🛒</span>
+            <span class="area-name">Mercadinho</span>
+          </button>
+          <button class="area-card" data-tab="areas" data-area="playground">
+            <span class="area-icon">🎠</span>
+            <span class="area-name">Playground</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="new-resident-highlight">
+    <div class="container">
+      <div class="welcome-card">
+        <div class="welcome-content">
+          <div class="welcome-badge">🏠 Novo Morador</div>
+          <h2 class="welcome-title">Bem-vindo ao seu novo lar!</h2>
+          <p class="welcome-text">
+            Preparamos um guia completo para você se integrar rapidamente à nossa comunidade.
+            Siga os passos essenciais e descubra tudo sobre o condomínio.
+          </p>
+          <div class="welcome-steps">
+            <div class="step-item">
+              <span class="step-icon">📱</span>
+              <span class="step-text">Cadastre-se no app Winker</span>
+            </div>
+            <div class="step-item">
+              <span class="step-icon">🔐</span>
+              <span class="step-text">Solicite reconhecimento facial</span>
+            </div>
+            <div class="step-item">
+              <span class="step-icon">🧺</span>
+              <span class="step-text">Configure a lavanderia</span>
+            </div>
+            <div class="step-item">
+              <span class="step-icon">📋</span>
+              <span class="step-text">Conheça as regras e áreas</span>
+            </div>
+          </div>
+          <button class="btn btn--primary btn--large" data-tab="novo-morador">
+            Ver guia completo do novo morador
+          </button>
+        </div>
+        <div class="welcome-visual">
+          <div class="welcome-emoji">🎉</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="quick">
+    <div class="container quick__grid">
+      <button class="quick__card" data-tab="areas">
+        <span class="quick__icon">🏋️</span>
+        <span class="quick__title">Áreas comuns</span>
+        <span class="quick__desc">Regras e orientações de uso</span>
+      </button>
+
+      <button class="quick__card" data-tab="documentos">
+        <span class="quick__icon">📄</span>
+        <span class="quick__title">Documentos/Avisos</span>
+        <span class="quick__desc">Regulamento, avisos e comunicados</span>
+      </button>
+
+      <button class="quick__card" data-tab="novo-morador">
+        <span class="quick__icon">🧳</span>
+        <span class="quick__title">Novo morador</span>
+        <span class="quick__desc">Checklist de entrada e cadastros</span>
+      </button>
+
+      <button class="quick__card" data-tab="contatos">
+        <span class="quick__icon">☎️</span>
+        <span class="quick__title">Contatos</span>
+        <span class="quick__desc">Portaria, síndico, emergências</span>
+      </button>
+    </div>
+  </section>
+
+  {% include "partials/_footer.html" %}
+</div>

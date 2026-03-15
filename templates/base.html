@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Condomínio Plano&Estação Barra Funda • Portal do Morador</title>
+  <meta name="description" content="Informações, avisos, documentos e áreas comuns do condomínio." />
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+  <header class="header">
+    <div class="container header__inner">
+      <div class="brand">
+        <div class="brand__mark" aria-hidden="true">🏢</div>
+        <div class="brand__text">
+          <strong class="brand__title">Plano&Estação Barra Funda</strong>
+          <span class="brand__subtitle">Portal do Morador</span>
+        </div>
+      </div>
+
+      <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav">
+        Menu
+      </button>
+
+      <nav id="nav" class="nav" aria-label="Navegação principal">
+        <button class="nav-tab active" data-tab="inicio">Início</button>
+        <button class="nav-tab" data-tab="areas">Áreas Comuns</button>
+        <button class="nav-tab" data-tab="documentos">Documentos/Avisos</button>
+        <button class="nav-tab" data-tab="faq">FAQ</button>
+        <button class="nav-tab nav-tab--highlight" data-tab="novo-morador">
+          <span class="highlight-badge">NOVO</span>
+          🏠 Novo Morador
+        </button>
+        <button class="nav-tab" data-tab="vendas">🛒 Vendas</button>
+        <button class="nav-tab" data-tab="contatos">Contatos</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="/static/js/app.js"></script>
+</body>
+
+</html>

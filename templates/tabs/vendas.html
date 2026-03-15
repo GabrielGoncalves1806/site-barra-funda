@@ -1,0 +1,22 @@
+<!-- ABA VENDAS -->
+<div class="tab-content" id="tab-vendas">
+  <section class="section">
+    <div class="container">
+      <div class="section__head">
+        <h2>🛒 Vendas entre Moradores</h2>
+        <p>Confira os produtos e serviços oferecidos pelos moradores do condomínio. Clique no botão para entrar em
+          contato pelo WhatsApp.</p>
+      </div>
+
+      <div class="sales-grid" data-sales-root></div>
+
+      <div class="sales-empty" id="salesEmpty" style="display: none;">
+        <div class="sales-empty__icon">🛍️</div>
+        <h3>Nenhum produto disponível</h3>
+        <p>No momento não há produtos anunciados. Volte em breve!</p>
+      </div>
+    </div>
+  </section>
+
+  {% include "partials/_footer.html" %}
+</div>
