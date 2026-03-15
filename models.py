@@ -57,3 +57,61 @@ class SaleUpdate(SQLModel):
     seller: Optional[str] = None
     whatsapp: Optional[str] = None
     active: Optional[bool] = None
+
+
+# ── Areas ────────────────────────────────────────────────
+class AreaBase(SQLModel):
+    title: str
+    slug: str
+    tag: str = ""
+    description: str = ""
+    image: str = ""
+    highlights: str = "[]"
+    meta: str = "[]"
+    rules: str = "[]"
+    display_order: int = 0
+
+
+class Area(AreaBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+
+class AreaCreate(AreaBase):
+    pass
+
+
+class AreaUpdate(SQLModel):
+    title: Optional[str] = None
+    slug: Optional[str] = None
+    tag: Optional[str] = None
+    description: Optional[str] = None
+    image: Optional[str] = None
+    highlights: Optional[str] = None
+    meta: Optional[str] = None
+    rules: Optional[str] = None
+    display_order: Optional[int] = None
+
+
+# ── FAQs ─────────────────────────────────────────────────
+class FAQBase(SQLModel):
+    question: str
+    answer: str
+    icon: str = "❓"
+    anchor_id: str = ""
+    display_order: int = 0
+
+
+class FAQ(FAQBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+
+class FAQCreate(FAQBase):
+    pass
+
+
+class FAQUpdate(SQLModel):
+    question: Optional[str] = None
+    answer: Optional[str] = None
+    icon: Optional[str] = None
+    anchor_id: Optional[str] = None
+    display_order: Optional[int] = None

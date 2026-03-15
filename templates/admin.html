@@ -295,6 +295,8 @@
     <div class="admin-tabs">
       <button class="admin-tab active" data-admin-tab="notices">📢 Avisos</button>
       <button class="admin-tab" data-admin-tab="sales">🛒 Vendas</button>
+      <button class="admin-tab" data-admin-tab="areas">🏋️ Áreas</button>
+      <button class="admin-tab" data-admin-tab="faqs">❓ FAQs</button>
     </div>
 
     <!-- SEÇÃO AVISOS -->
@@ -380,6 +382,105 @@
         <div class="item-list" id="salesList"></div>
       </div>
     </div>
+    <!-- SEÇÃO ÁREAS -->
+    <div class="admin-section" id="section-areas">
+      <div class="admin-card">
+        <h3>Adicionar Nova Área</h3>
+        <form id="areaForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nome</label>
+              <input type="text" id="areaTitle" required placeholder="Ex: Academia" />
+            </div>
+            <div class="form-group">
+              <label>Slug (identificador URL)</label>
+              <input type="text" id="areaSlug" required placeholder="Ex: academia" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tag</label>
+              <input type="text" id="areaTag" placeholder="Ex: Uso livre 24h" />
+            </div>
+            <div class="form-group">
+              <label>URL da Imagem</label>
+              <input type="text" id="areaImage" placeholder="Ex: /static/assets/area-academia.jpg" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Descrição</label>
+            <textarea id="areaDescription" placeholder="Descrição da área..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Regras (uma por linha, exibidas no card)</label>
+            <textarea id="areaRules"
+              placeholder="Acesso 24h via reconhecimento facial.&#10;Uso obrigatório de toalha."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Destaques do modal (um por linha)</label>
+            <textarea id="areaHighlights"
+              placeholder="Acesso por reconhecimento facial&#10;Use toalha e limpe os aparelhos"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Meta do modal (um por linha)</label>
+              <textarea id="areaMeta" rows="2" placeholder="Reservas: dispensa&#10;Contato: Administração"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Ordem de exibição</label>
+              <input type="number" id="areaOrder" value="0" min="0" />
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn-admin btn-admin--primary">Adicionar Área</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="admin-card">
+        <h3>Áreas Cadastradas</h3>
+        <div class="item-list" id="areasList"></div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO FAQs -->
+    <div class="admin-section" id="section-faqs">
+      <div class="admin-card">
+        <h3>Adicionar Nova FAQ</h3>
+        <form id="faqForm">
+          <div class="form-group">
+            <label>Pergunta</label>
+            <input type="text" id="faqQuestion" required placeholder="Ex: Até que horas posso fazer barulho?" />
+          </div>
+          <div class="form-group">
+            <label>Resposta</label>
+            <textarea id="faqAnswer" required placeholder="Resposta completa..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Ícone (emoji)</label>
+              <input type="text" id="faqIcon" value="❓" />
+            </div>
+            <div class="form-group">
+              <label>Âncora (ID para busca)</label>
+              <input type="text" id="faqAnchor" placeholder="Ex: faq-silencio" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Ordem de exibição</label>
+            <input type="number" id="faqOrder" value="0" min="0" />
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="btn-admin btn-admin--primary">Adicionar FAQ</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="admin-card">
+        <h3>FAQs Cadastradas</h3>
+        <div class="item-list" id="faqsList"></div>
+      </div>
+    </div>
   </div>
 
   <div class="toast" id="toast">Salvo com sucesso!</div>
@@ -387,6 +488,12 @@
   <script>
     let notices = [];
     let sales = [];
+    let areas = [];
+    let faqs = [];
+
+    function linesToJSON(text) {
+      return JSON.stringify(text.split('\n').map(l => l.trim()).filter(Boolean));
+    }
 
     function showToast(msg) {
       const toast = document.getElementById('toast');
@@ -440,14 +547,20 @@
 
     async function loadData() {
       try {
-        const [noticesRes, salesRes] = await Promise.all([
+        const [noticesRes, salesRes, areasRes, faqsRes] = await Promise.all([
           fetch('/api/notices'),
-          fetch('/api/sales')
+          fetch('/api/sales'),
+          fetch('/api/areas'),
+          fetch('/api/faqs')
         ]);
         notices = await noticesRes.json();
         sales = await salesRes.json();
+        areas = await areasRes.json();
+        faqs = await faqsRes.json();
         renderNoticesList();
         renderSalesList();
+        renderAreasList();
+        renderFaqsList();
       } catch (err) {
         console.error('Erro ao carregar dados:', err);
       }
@@ -565,6 +678,119 @@
       await fetch(`/api/sales/${id}/toggle`, { method: 'PATCH' });
       await loadData();
       showToast('Status atualizado.');
+    }
+
+    // ── Áreas ──
+    function renderAreasList() {
+      const list = document.getElementById('areasList');
+      if (!areas.length) {
+        list.innerHTML = '<p style="color: var(--muted);">Nenhuma área cadastrada.</p>';
+        return;
+      }
+      list.innerHTML = areas.map(a => `
+        <div class="item-row">
+          <div class="item-row__info">
+            <div class="item-row__title">${a.title}</div>
+            <div class="item-row__meta">${a.slug} • ${a.tag} • Ordem: ${a.display_order}</div>
+          </div>
+          <div class="item-row__actions">
+            <button class="btn-icon btn-icon--danger" onclick="deleteArea(${a.id})" title="Excluir">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('areaForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        title: document.getElementById('areaTitle').value,
+        slug: document.getElementById('areaSlug').value,
+        tag: document.getElementById('areaTag').value,
+        image: document.getElementById('areaImage').value,
+        description: document.getElementById('areaDescription').value,
+        rules: linesToJSON(document.getElementById('areaRules').value),
+        highlights: linesToJSON(document.getElementById('areaHighlights').value),
+        meta: linesToJSON(document.getElementById('areaMeta').value),
+        display_order: parseInt(document.getElementById('areaOrder').value) || 0
+      };
+      try {
+        const res = await fetch('/api/areas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          await loadData();
+          e.target.reset();
+          document.getElementById('areaOrder').value = '0';
+          showToast('Área adicionada com sucesso!');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    async function deleteArea(id) {
+      if (confirm('Deseja realmente excluir esta área?')) {
+        await fetch(`/api/areas/${id}`, { method: 'DELETE' });
+        await loadData();
+        showToast('Área excluída.');
+      }
+    }
+
+    // ── FAQs ──
+    function renderFaqsList() {
+      const list = document.getElementById('faqsList');
+      if (!faqs.length) {
+        list.innerHTML = '<p style="color: var(--muted);">Nenhuma FAQ cadastrada.</p>';
+        return;
+      }
+      list.innerHTML = faqs.map(f => `
+        <div class="item-row">
+          <div class="item-row__info">
+            <div class="item-row__title">${f.icon} ${f.question}</div>
+            <div class="item-row__meta">${f.anchor_id || '—'} • Ordem: ${f.display_order}</div>
+          </div>
+          <div class="item-row__actions">
+            <button class="btn-icon btn-icon--danger" onclick="deleteFaq(${f.id})" title="Excluir">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('faqForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        question: document.getElementById('faqQuestion').value,
+        answer: document.getElementById('faqAnswer').value,
+        icon: document.getElementById('faqIcon').value || '❓',
+        anchor_id: document.getElementById('faqAnchor').value,
+        display_order: parseInt(document.getElementById('faqOrder').value) || 0
+      };
+      try {
+        const res = await fetch('/api/faqs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          await loadData();
+          e.target.reset();
+          document.getElementById('faqIcon').value = '❓';
+          document.getElementById('faqOrder').value = '0';
+          showToast('FAQ adicionada com sucesso!');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    async function deleteFaq(id) {
+      if (confirm('Deseja realmente excluir esta FAQ?')) {
+        await fetch(`/api/faqs/${id}`, { method: 'DELETE' });
+        await loadData();
+        showToast('FAQ excluída.');
+      }
     }
 
     checkAuth();

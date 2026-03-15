@@ -76,113 +76,8 @@ if (searchForm && searchInput) {
   });
 }
 
-// ===== MODAL ÁREAS COMUNS =====
-const AREA_DETAILS = {
-  academia: {
-    title: "Academia",
-    tag: "Uso livre 24h",
-    description: "Espaço equipado com esteiras, bicicletas, pesos livres e máquinas multiestação. Priorize o uso responsável e dê espaço a outros moradores.",
-    image: "/static/assets/area-academia.jpg",
-    highlights: [
-      "Acesso por reconhecimento facial",
-      "Use toalha e limpe os aparelhos",
-      "Proibido treinar descalço",
-      "Capacidade sugerida: 8 pessoas"
-    ],
-    meta: ["Reservas: dispensa", "Contato: Administração"],
-  },
-  salao: {
-    title: "Salão de Festas",
-    tag: "Reserva via Winker",
-    description: "Ambiente climatizado com copa, mesas e cadeiras para eventos sociais. Ideal para aniversários, confraternizações e reuniões.",
-    image: "/static/assets/area-salao.jpg",
-    highlights: [
-      "Capacidade 30 pessoas",
-      "Dom-qui 10h-22h | Sex-sáb 10h-23h",
-      "Taxa: 6% de 1 salário mínimo",
-      "Entrega de chave na portaria"
-    ],
-    meta: ["Reserva: 48h antecipada", "Limpeza obrigatória"],
-  },
-  lavanderia: {
-    title: "Lavanderia Laundry Express",
-    tag: "Funcionamento 24h",
-    description: "Máquinas inteligentes de lavar e secar roupa com pagamento por uso. Acompanhe ciclos pelo app.",
-    image: "/static/assets/area-lavanderia.jpg",
-    highlights: [
-      "Reserve e pague no app",
-      "Retire as roupas ao término",
-      "Dispõe de vending machine de sabão",
-      "Relate problemas no app"
-    ],
-    meta: ["Suporte: Laundry Express", "Acesso com QR Code"],
-  },
-  playground: {
-    title: "Playground",
-    tag: "Uso orientado",
-    description: "Área arborizada com brinquedos para crianças até 10 anos. Todos os brinquedos passam por inspeções periódicas.",
-    image: "/static/assets/area-playground.jpg",
-    highlights: [
-      "Horário 8h às 22h",
-      "Adulto responsável obrigatório",
-      "Entrada de pets proibida",
-      "Traga garrafa de água"
-    ],
-    meta: ["Capacidade sugerida: 8 crianças", "Manutenção mensal"],
-  },
-  churrasqueira: {
-    title: "Churrasqueira",
-    tag: "Reserva via Winker",
-    description: "Deck externo com grelha, bancada, pia e freezer compartilhado. Perfeito para confraternizações intimistas.",
-    image: "/static/assets/area-churrasqueira.jpg",
-    highlights: [
-      "Capacidade 15 pessoas",
-      "Horário 10h às 22h",
-      "Taxa 5% de 1 salário mínimo",
-      "Não combinar com salão"
-    ],
-    meta: ["Reserva 48h antes", "Levar carvão/utensílios"],
-  },
-  coworking: {
-    title: "Coworking",
-    tag: "Uso compartilhado",
-    description: "Sala com mesas colaborativas, cabines para videochamadas e internet de alta velocidade.",
-    image: "/static/assets/area-coworking.jpg",
-    highlights: [
-      "Horário 7h às 22h",
-      "Até 3 convidados por unidade",
-      "Obrigatório uso de fones",
-      "Disponível café e água"
-    ],
-    meta: ["Reservas: dispensadas", "Manter silêncio"],
-  },
-  "espaco-pet": {
-    title: "Espaço Pet",
-    tag: "Aberto 24h",
-    description: "Pet place com gramado sintético, bebedouro e dispenser de sacos para recolhimento.",
-    image: "/static/assets/area-pet.jpg",
-    highlights: [
-      "Pets sempre em coleira",
-      "Permitido somente animais vacinados",
-      "Limpe após o uso",
-      "Evite horários de pico se o pet for reativo"
-    ],
-    meta: ["Acesso livre", "Contato: Síndico"],
-  },
-  bicicletario: {
-    title: "Bicicletário",
-    tag: "Uso com cadastro",
-    description: "Estacionamento coberto com suportes verticais e monitoramento por câmeras.",
-    image: "/static/assets/area-bicicletario.jpg",
-    highlights: [
-      "1 bicicleta por unidade",
-      "Obrigatório cadeado",
-      "Identifique com bloco/apto",
-      "Não deixe acessórios soltos"
-    ],
-    meta: ["Cadastro com zeladoria", "Proibido motos"],
-  }
-};
+// ===== ÁREAS COMUNS (carregadas da API) =====
+let AREA_DETAILS = {};
 
 const modal = document.querySelector("#areaModal");
 const modalImage = document.querySelector("#areaModalImage");
@@ -192,15 +87,21 @@ const modalDescription = document.querySelector("#areaModalDescription");
 const modalHighlights = document.querySelector("#areaModalHighlights");
 const modalMeta = document.querySelector("#areaModalMeta");
 
+function parseJSON(str) {
+  try { return JSON.parse(str); } catch { return []; }
+}
+
 function populateModal(data) {
   if (!data) return;
+  const highlights = Array.isArray(data.highlights) ? data.highlights : parseJSON(data.highlights);
+  const meta = Array.isArray(data.meta) ? data.meta : parseJSON(data.meta);
   modalImage.src = data.image;
   modalImage.alt = data.title;
   modalTag.textContent = data.tag;
   modalTitle.textContent = data.title;
   modalDescription.textContent = data.description;
-  modalHighlights.innerHTML = data.highlights.map(item => `<li>${item}</li>`).join("");
-  modalMeta.innerHTML = data.meta.map(item => `<span>${item}</span>`).join("");
+  modalHighlights.innerHTML = highlights.map(item => `<li>${item}</li>`).join("");
+  modalMeta.innerHTML = meta.map(item => `<span>${item}</span>`).join("");
 }
 
 function openModal(data) {
@@ -214,12 +115,11 @@ function closeModal() {
   document.body.classList.remove("modal-open");
 }
 
-document.querySelectorAll('[data-area-detail]').forEach(card => {
+function bindAreaCard(card) {
   card.addEventListener('click', () => {
     const key = card.getAttribute('data-area-detail');
     openModal(AREA_DETAILS[key]);
   });
-
   card.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -227,12 +127,79 @@ document.querySelectorAll('[data-area-detail]').forEach(card => {
       openModal(AREA_DETAILS[key]);
     }
   });
-});
+}
+
+function renderAreaCards(areas) {
+  const root = document.querySelector('[data-areas-root]');
+  if (!root) return;
+  root.innerHTML = "";
+  AREA_DETAILS = {};
+
+  areas.forEach(area => {
+    const rules = Array.isArray(area.rules) ? area.rules : parseJSON(area.rules);
+    AREA_DETAILS[area.slug] = area;
+
+    const card = document.createElement("article");
+    card.className = "card";
+    card.setAttribute("data-area-detail", area.slug);
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("aria-label", `Ver detalhes de ${area.title}`);
+    card.innerHTML = `
+      <img src="${area.image}" alt="${area.title}" loading="lazy" />
+      <div class="card__body">
+        <h3>${area.title}</h3>
+        <ul>${rules.map(r => `<li>${r}</li>`).join("")}</ul>
+      </div>
+    `;
+    bindAreaCard(card);
+    root.appendChild(card);
+  });
+}
+
+async function loadAreas() {
+  try {
+    const res = await fetch('/api/areas');
+    const areas = await res.json();
+    renderAreaCards(areas);
+  } catch (err) {
+    console.warn('Não foi possível carregar áreas:', err);
+  }
+}
+loadAreas();
 
 document.querySelectorAll('[data-modal-close]').forEach(btn => btn.addEventListener('click', closeModal));
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && modal?.classList.contains('is-open')) closeModal();
 });
+
+// ===== FAQs (carregadas da API) =====
+function renderFAQs(faqs) {
+  const root = document.querySelector('[data-faqs-root]');
+  if (!root) return;
+  root.innerHTML = "";
+
+  faqs.forEach(faq => {
+    const details = document.createElement("details");
+    if (faq.anchor_id) details.id = faq.anchor_id;
+    details.innerHTML = `
+      <summary>${faq.icon} ${faq.question}</summary>
+      <p>${faq.answer}</p>
+    `;
+    root.appendChild(details);
+  });
+}
+
+async function loadFAQs() {
+  try {
+    const res = await fetch('/api/faqs');
+    const faqs = await res.json();
+    renderFAQs(faqs);
+  } catch (err) {
+    console.warn('Não foi possível carregar FAQs:', err);
+  }
+}
+loadFAQs();
 
 // ===== NAV MOBILE =====
 const toggle = document.querySelector(".nav__toggle");
