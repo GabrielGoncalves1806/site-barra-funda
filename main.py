@@ -19,7 +19,10 @@ from models import (
 )
 
 
-UPLOAD_DIR = Path("static/uploads")
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
+TEMPLATES_DIR = BASE_DIR / "templates"
+UPLOAD_DIR = STATIC_DIR / "uploads"
 
 
 def ensure_upload_dir():
@@ -42,8 +45,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
 # ── Páginas ──────────────────────────────────────────────
