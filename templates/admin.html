@@ -327,7 +327,9 @@
             </div>
           </div>
           <div class="btn-row">
-            <button type="submit" class="btn-admin btn-admin--primary">Adicionar Aviso</button>
+            <button type="submit" class="btn-admin btn-admin--primary" id="noticeSubmitBtn">Adicionar Aviso</button>
+            <button type="button" class="btn-admin btn-admin--ghost hidden" id="noticeCancelEdit">Cancelar
+              edição</button>
           </div>
         </form>
       </div>
@@ -374,7 +376,8 @@
             </div>
           </div>
           <div class="btn-row">
-            <button type="submit" class="btn-admin btn-admin--primary">Adicionar Produto</button>
+            <button type="submit" class="btn-admin btn-admin--primary" id="saleSubmitBtn">Adicionar Produto</button>
+            <button type="button" class="btn-admin btn-admin--ghost hidden" id="saleCancelEdit">Cancelar edição</button>
           </div>
         </form>
       </div>
@@ -436,7 +439,8 @@
             </div>
           </div>
           <div class="btn-row">
-            <button type="submit" class="btn-admin btn-admin--primary">Adicionar Área</button>
+            <button type="submit" class="btn-admin btn-admin--primary" id="areaSubmitBtn">Adicionar Área</button>
+            <button type="button" class="btn-admin btn-admin--ghost hidden" id="areaCancelEdit">Cancelar edição</button>
           </div>
         </form>
       </div>
@@ -475,7 +479,8 @@
             <input type="number" id="faqOrder" value="0" min="0" />
           </div>
           <div class="btn-row">
-            <button type="submit" class="btn-admin btn-admin--primary">Adicionar FAQ</button>
+            <button type="submit" class="btn-admin btn-admin--primary" id="faqSubmitBtn">Adicionar FAQ</button>
+            <button type="button" class="btn-admin btn-admin--ghost hidden" id="faqCancelEdit">Cancelar edição</button>
           </div>
         </form>
       </div>
@@ -494,6 +499,11 @@
     let sales = [];
     let areas = [];
     let faqs = [];
+
+    let editingNoticeId = null;
+    let editingSaleId = null;
+    let editingAreaId = null;
+    let editingFaqId = null;
 
     function linesToJSON(text) {
       return JSON.stringify(text.split('\n').map(l => l.trim()).filter(Boolean));
@@ -600,6 +610,7 @@
             <div class="item-row__meta">${n.level.toUpperCase()} • ${n.author} • ${n.date}</div>
           </div>
           <div class="item-row__actions">
+            <button class="btn-icon" onclick="editNotice(${n.id})" title="Editar">✏️</button>
             <button class="btn-icon btn-icon--danger" onclick="deleteNotice(${n.id})" title="Excluir">🗑️</button>
           </div>
         </div>
@@ -619,12 +630,24 @@
             <div class="item-row__meta">${s.seller} • ${s.active ? '✅ Ativo' : '❌ Inativo'}</div>
           </div>
           <div class="item-row__actions">
+            <button class="btn-icon" onclick="editSale(${s.id})" title="Editar">✏️</button>
             <button class="btn-icon" onclick="toggleSale(${s.id})" title="${s.active ? 'Desativar' : 'Ativar'}">${s.active ? '⏸️' : '▶️'}</button>
             <button class="btn-icon btn-icon--danger" onclick="deleteSale(${s.id})" title="Excluir">🗑️</button>
           </div>
         </div>
       `).join('');
     }
+
+    function resetNoticeForm() {
+      const form = document.getElementById('noticeForm');
+      form.reset();
+      document.getElementById('noticeAuthor').value = 'Síndico';
+      editingNoticeId = null;
+      document.getElementById('noticeSubmitBtn').textContent = 'Adicionar Aviso';
+      document.getElementById('noticeCancelEdit').classList.add('hidden');
+    }
+
+    document.getElementById('noticeCancelEdit').addEventListener('click', resetNoticeForm);
 
     document.getElementById('noticeForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -635,22 +658,37 @@
         author: document.getElementById('noticeAuthor').value,
         date: new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
       };
+      const isEditing = Boolean(editingNoticeId);
+      const url = isEditing ? `/api/notices/${editingNoticeId}` : '/api/notices';
+      const method = isEditing ? 'PUT' : 'POST';
       try {
-        const res = await fetch('/api/notices', {
-          method: 'POST',
+        const res = await fetch(url, {
+          method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         if (res.ok) {
           await loadData();
-          e.target.reset();
-          document.getElementById('noticeAuthor').value = 'Síndico';
-          showToast('Aviso adicionado com sucesso!');
+          resetNoticeForm();
+          showToast(isEditing ? 'Aviso atualizado com sucesso!' : 'Aviso adicionado com sucesso!');
         }
       } catch (err) {
         console.error(err);
       }
     });
+
+    function resetSaleForm() {
+      const form = document.getElementById('saleForm');
+      form.reset();
+      document.getElementById('saleImageStatus').textContent = 'Selecione uma imagem para enviar.';
+      document.getElementById('saleImageUrl').value = '/static/assets/placeholder-sale.jpg';
+      document.getElementById('saleImageFile').value = '';
+      editingSaleId = null;
+      document.getElementById('saleSubmitBtn').textContent = 'Adicionar Produto';
+      document.getElementById('saleCancelEdit').classList.add('hidden');
+    }
+
+    document.getElementById('saleCancelEdit').addEventListener('click', resetSaleForm);
 
     document.getElementById('saleForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -670,22 +708,24 @@
         price: document.getElementById('salePrice').value,
         whatsapp: document.getElementById('saleWhatsapp').value.replace(/\D/g, ''),
         seller: document.getElementById('saleSeller').value,
-        image: imageInput.value || '/static/assets/placeholder-sale.jpg',
-        active: true
+        image: imageInput.value || '/static/assets/placeholder-sale.jpg'
       };
+      if (!editingSaleId) {
+        payload.active = true;
+      }
+      const isEditing = Boolean(editingSaleId);
+      const url = isEditing ? `/api/sales/${editingSaleId}` : '/api/sales';
+      const method = isEditing ? 'PUT' : 'POST';
       try {
-        const res = await fetch('/api/sales', {
-          method: 'POST',
+        const res = await fetch(url, {
+          method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         if (res.ok) {
           await loadData();
-          e.target.reset();
-          statusEl.textContent = 'Selecione uma imagem para enviar.';
-          imageInput.value = '/static/assets/placeholder-sale.jpg';
-          fileInput.value = '';
-          showToast('Produto adicionado com sucesso!');
+          resetSaleForm();
+          showToast(isEditing ? 'Produto atualizado com sucesso!' : 'Produto adicionado com sucesso!');
         }
       } catch (err) {
         console.error(err);
@@ -728,39 +768,63 @@
             <div class="item-row__meta">${a.slug} • ${a.tag} • Ordem: ${a.display_order}</div>
           </div>
           <div class="item-row__actions">
+            <button class="btn-icon" onclick="editArea(${a.id})" title="Editar">✏️</button>
             <button class="btn-icon btn-icon--danger" onclick="deleteArea(${a.id})" title="Excluir">🗑️</button>
           </div>
         </div>
       `).join('');
     }
 
+    function resetAreaForm() {
+      const form = document.getElementById('areaForm');
+      form.reset();
+      document.getElementById('areaOrder').value = '0';
+      document.getElementById('areaImageStatus').textContent = 'Envie uma imagem representativa.';
+      document.getElementById('areaImageUrl').value = '';
+      document.getElementById('areaImageFile').value = '';
+      editingAreaId = null;
+      document.getElementById('areaSubmitBtn').textContent = 'Adicionar Área';
+      document.getElementById('areaCancelEdit').classList.add('hidden');
+    }
+
+    document.getElementById('areaCancelEdit').addEventListener('click', resetAreaForm);
+
     document.getElementById('areaForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      const imageInput = document.getElementById('areaImageUrl');
+      const fileInput = document.getElementById('areaImageFile');
+      const statusEl = document.getElementById('areaImageStatus');
+      if (fileInput.files?.length) {
+        try {
+          await uploadImage(fileInput, imageInput, statusEl);
+        } catch {
+          return;
+        }
+      }
       const payload = {
         title: document.getElementById('areaTitle').value,
         slug: document.getElementById('areaSlug').value,
         tag: document.getElementById('areaTag').value,
-        image: document.getElementById('areaImage').value,
+        image: imageInput.value,
         description: document.getElementById('areaDescription').value,
         rules: linesToJSON(document.getElementById('areaRules').value),
         highlights: linesToJSON(document.getElementById('areaHighlights').value),
         meta: linesToJSON(document.getElementById('areaMeta').value),
         display_order: parseInt(document.getElementById('areaOrder').value) || 0
       };
+      const isEditing = Boolean(editingAreaId);
+      const url = isEditing ? `/api/areas/${editingAreaId}` : '/api/areas';
+      const method = isEditing ? 'PUT' : 'POST';
       try {
-        const res = await fetch('/api/areas', {
-          method: 'POST',
+        const res = await fetch(url, {
+          method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         if (res.ok) {
           await loadData();
-          e.target.reset();
-          document.getElementById('areaOrder').value = '0';
-          document.getElementById('areaImageStatus').textContent = 'Envie uma imagem representativa.';
-          document.getElementById('areaImageUrl').value = '';
-          document.getElementById('areaImageFile').value = '';
-          showToast('Área adicionada com sucesso!');
+          resetAreaForm();
+          showToast(isEditing ? 'Área atualizada com sucesso!' : 'Área adicionada com sucesso!');
         }
       } catch (err) {
         console.error(err);
@@ -789,11 +853,24 @@
             <div class="item-row__meta">${f.anchor_id || '—'} • Ordem: ${f.display_order}</div>
           </div>
           <div class="item-row__actions">
+            <button class="btn-icon" onclick="editFaq(${f.id})" title="Editar">✏️</button>
             <button class="btn-icon btn-icon--danger" onclick="deleteFaq(${f.id})" title="Excluir">🗑️</button>
           </div>
         </div>
       `).join('');
     }
+
+    function resetFaqForm() {
+      const form = document.getElementById('faqForm');
+      form.reset();
+      document.getElementById('faqIcon').value = '❓';
+      document.getElementById('faqOrder').value = '0';
+      editingFaqId = null;
+      document.getElementById('faqSubmitBtn').textContent = 'Adicionar FAQ';
+      document.getElementById('faqCancelEdit').classList.add('hidden');
+    }
+
+    document.getElementById('faqCancelEdit').addEventListener('click', resetFaqForm);
 
     document.getElementById('faqForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -804,23 +881,91 @@
         anchor_id: document.getElementById('faqAnchor').value,
         display_order: parseInt(document.getElementById('faqOrder').value) || 0
       };
+      const isEditing = Boolean(editingFaqId);
+      const url = isEditing ? `/api/faqs/${editingFaqId}` : '/api/faqs';
+      const method = isEditing ? 'PUT' : 'POST';
       try {
-        const res = await fetch('/api/faqs', {
-          method: 'POST',
+        const res = await fetch(url, {
+          method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         if (res.ok) {
           await loadData();
-          e.target.reset();
-          document.getElementById('faqIcon').value = '❓';
-          document.getElementById('faqOrder').value = '0';
-          showToast('FAQ adicionada com sucesso!');
+          resetFaqForm();
+          showToast(isEditing ? 'FAQ atualizada com sucesso!' : 'FAQ adicionada com sucesso!');
         }
       } catch (err) {
         console.error(err);
       }
     });
+
+    function fillLinesTextArea(text) {
+      if (Array.isArray(text)) return text.join('\n');
+      try { return JSON.parse(text).join('\n'); } catch { return text || ''; }
+    }
+
+    window.editNotice = function (id) {
+      const notice = notices.find(n => n.id === id);
+      if (!notice) return;
+      editingNoticeId = id;
+      document.getElementById('noticeTitle').value = notice.title;
+      document.getElementById('noticeText').value = notice.text;
+      document.getElementById('noticeLevel').value = notice.level;
+      document.getElementById('noticeAuthor').value = notice.author;
+      document.getElementById('noticeSubmitBtn').textContent = 'Salvar alterações';
+      document.getElementById('noticeCancelEdit').classList.remove('hidden');
+      showToast('Editando aviso selecionado.');
+    };
+
+    window.editSale = function (id) {
+      const sale = sales.find(s => s.id === id);
+      if (!sale) return;
+      editingSaleId = id;
+      document.getElementById('saleTitle').value = sale.title;
+      document.getElementById('saleDescription').value = sale.description;
+      document.getElementById('salePrice').value = sale.price;
+      document.getElementById('saleWhatsapp').value = sale.whatsapp;
+      document.getElementById('saleSeller').value = sale.seller;
+      document.getElementById('saleImageUrl').value = sale.image;
+      document.getElementById('saleImageStatus').textContent = 'Imagem atual mantida. Envie outra se quiser trocar.';
+      document.getElementById('saleSubmitBtn').textContent = 'Salvar alterações';
+      document.getElementById('saleCancelEdit').classList.remove('hidden');
+      showToast('Editando produto selecionado.');
+    };
+
+    window.editArea = function (id) {
+      const area = areas.find(a => a.id === id);
+      if (!area) return;
+      editingAreaId = id;
+      document.getElementById('areaTitle').value = area.title;
+      document.getElementById('areaSlug').value = area.slug;
+      document.getElementById('areaTag').value = area.tag;
+      document.getElementById('areaDescription').value = area.description;
+      document.getElementById('areaRules').value = fillLinesTextArea(area.rules);
+      document.getElementById('areaHighlights').value = fillLinesTextArea(area.highlights);
+      document.getElementById('areaMeta').value = fillLinesTextArea(area.meta);
+      document.getElementById('areaOrder').value = area.display_order || 0;
+      document.getElementById('areaImageUrl').value = area.image;
+      document.getElementById('areaImageStatus').textContent = 'Imagem atual mantida. Envie outra se quiser trocar.';
+      document.getElementById('areaSubmitBtn').textContent = 'Salvar alterações';
+      document.getElementById('areaCancelEdit').classList.remove('hidden');
+      showToast('Editando área selecionada.');
+    };
+
+    window.editFaq = function (id) {
+      const faq = faqs.find(f => f.id === id);
+      if (!faq) return;
+      editingFaqId = id;
+      document.getElementById('faqQuestion').value = faq.question;
+      document.getElementById('faqAnswer').value = faq.answer;
+      document.getElementById('faqIcon').value = faq.icon;
+      document.getElementById('faqAnchor').value = faq.anchor_id;
+      document.getElementById('faqOrder').value = faq.display_order || 0;
+      document.getElementById('faqSubmitBtn').textContent = 'Salvar alterações';
+      document.getElementById('faqCancelEdit').classList.remove('hidden');
+      showToast('Editando FAQ selecionada.');
+    };
 
     async function deleteFaq(id) {
       if (confirm('Deseja realmente excluir esta FAQ?')) {
