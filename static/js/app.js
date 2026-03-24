@@ -101,7 +101,13 @@ function populateModal(data) {
   modalTitle.textContent = data.title;
   modalDescription.textContent = data.description;
   modalHighlights.innerHTML = highlights.map(item => `<li>${item}</li>`).join("");
-  modalMeta.innerHTML = meta.map(item => `<span>${item}</span>`).join("");
+  modalMeta.innerHTML = meta.map(item => {
+    if (/^https?:\/\//.test(item)) {
+      const display = item.replace(/^https?:\/\//, '');
+      return `<span><a href="${item}" target="_blank" rel="noopener noreferrer" style="pointer-events:auto">${display}</a></span>`;
+    }
+    return `<span>${item}</span>`;
+  }).join("");
 }
 
 function openModal(data) {
