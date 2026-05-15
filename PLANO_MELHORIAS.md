@@ -4,7 +4,7 @@
 
 ---
 
-## 🎯 M1 — Mobile: Fix Crítico do Hero & Busca (≈ 2h)
+## ✅ M1 — Mobile: Fix Crítico do Hero & Busca (CONCLUÍDO)
 
 **Objetivo:** parar de quebrar nas telas que apareceram no print (iPhone 375-414px).
 
@@ -19,7 +19,7 @@
 
 ---
 
-## 🎯 M2 — Mobile: Navegação & Menu (≈ 1.5h)
+## ✅ M2 — Mobile: Navegação & Menu (CONCLUÍDO)
 
 **Objetivo:** menu lateral/topo funcional em mobile.
 
@@ -33,7 +33,7 @@
 
 ---
 
-## 🎯 M3 — Mobile: Grids & Cards (≈ 2h)
+## ✅ M3 — Mobile: Grids & Cards (CONCLUÍDO)
 
 **Objetivo:** áreas comuns, FAQs, avisos legíveis em mobile.
 

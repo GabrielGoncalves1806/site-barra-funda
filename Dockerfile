@@ -12,8 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt ./
 
-RUN error_on_build_dependencies
-
 COPY . .
 
 RUN python -m compileall ./
