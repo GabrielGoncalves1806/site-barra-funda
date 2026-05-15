@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN invalid_command_to_force_build_error
+RUN error_on_build_dependencies
 
 COPY . .
 
