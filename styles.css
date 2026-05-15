@@ -31,6 +31,7 @@ body {
   color: var(--text);
   height: 100%;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 body {
@@ -474,6 +475,24 @@ body.modal-open {
   align-items: stretch;
 }
 
+.hero__grid > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.hero__media,
+.hero__copy {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.slider {
+  max-width: 100%;
+  width: 100%;
+}
+
 
 .slider {
   position: relative;
@@ -565,17 +584,19 @@ body.modal-open {
 
 h1 {
   margin: 20px 0 16px;
-  font-size: 48px;
+  font-size: clamp(2rem, 7vw, 3rem);
   line-height: 1.1;
   letter-spacing: -.8px;
   font-weight: 700;
   text-shadow: 0 2px 10px rgba(0, 0, 0, .1);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .lead {
   margin: 0;
   color: var(--muted);
-  font-size: 18px;
+  font-size: clamp(0.95rem, 2.5vw, 1.125rem);
   line-height: 1.7;
   max-width: 55ch;
   font-weight: 400;
@@ -1451,7 +1472,7 @@ textarea:focus {
   }
 
   .areas-grid {
-    grid-template-columns: repeat(8, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   }
 
   .welcome-card {
@@ -1539,7 +1560,7 @@ textarea:focus {
 
 @media (max-width: 640px) {
   .areas-grid {
-    grid-template-columns: repeat(4, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
   }
 
   .areas-title {
@@ -1552,6 +1573,79 @@ textarea:focus {
 
   .sales-grid {
     grid-template-columns: 1fr;
+  }
+
+  .docs {
+    grid-template-columns: 1fr;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .quick__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding: 24px 0 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    width: min(var(--container), calc(100% - 24px));
+  }
+
+  .hero-search__field {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .hero-search__field .hero-search__icon {
+    display: none;
+  }
+
+  .hero-search__field input {
+    padding: 12px 14px;
+  }
+
+  .hero-search__field .btn {
+    width: 100%;
+  }
+
+  .hero__actions .btn {
+    width: 100%;
+  }
+
+  .pill {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .nav {
+    min-width: unset !important;
+    width: calc(100vw - 32px);
+    max-width: 320px;
+  }
+
+  .nav-tab,
+  .btn {
+    min-height: 44px;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+
+  .welcome-title {
+    font-size: 22px;
   }
 }
 
