@@ -47,7 +47,7 @@
 
 ---
 
-## 🎯 M4 — Mobile: Páginas Internas & Polimento (≈ 1.5h)
+## ✅ M4 — Mobile: Páginas Internas & Polimento (CONCLUÍDO)
 
 **Escopo:**
 - Auditar `templates/` (admin, documentos, etc.) em mobile.
@@ -59,7 +59,7 @@
 
 ---
 
-## 🔐 M5 — Segurança: Secrets & Senha Hasheada (≈ 2h)
+## ✅ M5 — Segurança: Secrets & Senha Hasheada (CONCLUÍDO)
 
 **Objetivo:** tirar credenciais do Git.
 
@@ -74,7 +74,7 @@
 
 ---
 
-## 🔐 M6 — Segurança: JWT + Proteção de Rotas (≈ 3h)
+## ✅ M6 — Segurança: JWT + Proteção de Rotas (CONCLUÍDO)
 
 **Objetivo:** backend de verdade autenticando.
 
@@ -89,7 +89,7 @@
 
 ---
 
-## 🔐 M7 — Segurança: Hardening (≈ 2h)
+## ✅ M7 — Segurança: Hardening (CONCLUÍDO)
 
 **Escopo:**
 - Rate limit em `/api/auth` com `slowapi` (5 tentativas/min por IP).
@@ -102,7 +102,7 @@
 
 ---
 
-## 📊 M8 — Observabilidade & Qualidade (≈ 3h)
+## ✅ M8 — Observabilidade & Qualidade (CONCLUÍDO)
 
 **Escopo:**
 - Logging estruturado (`logging` ou `loguru`) — audit log de operações admin (quem, quando, o quê).

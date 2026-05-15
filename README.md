@@ -1,109 +1,148 @@
 # Portal do Morador — Condomínio Plano&Estação Barra Funda
 
-Portal web para moradores do condomínio com painel administrativo para o síndico gerenciar avisos e vendas.
+Portal web para moradores do condomínio com painel administrativo para o síndico gerenciar avisos, vendas, áreas comuns e FAQs.
 
 ## Tecnologias
 
 - **Backend:** FastAPI + Uvicorn
-- **Banco de dados:** SQLite (via SQLModel)
+- **Banco:** SQLite (via SQLModel)
 - **Templates:** Jinja2
 - **Frontend:** HTML/CSS/JS (vanilla)
+- **Auth:** JWT em cookie httpOnly, senha hasheada com bcrypt
+- **Testes:** pytest + httpx
+- **Deploy:** Docker (Render)
 
-## Estrutura do Projeto
+## Setup local
 
-```
-site-barra-funda/
-├── main.py              # App FastAPI (rotas de páginas e API)
-├── database.py          # Conexão com SQLite
-├── models.py            # Modelos (Notice, Sale)
-├── seed.py              # Populador de dados iniciais
-├── requirements.txt     # Dependências Python
-├── data.db              # Banco SQLite (criado automaticamente)
-├── templates/
-│   ├── base.html        # Layout base (header, nav, scripts)
-│   ├── index.html       # Página principal (monta todas as abas)
-│   ├── admin.html       # Painel de administração
-│   ├── partials/
-│   │   └── _footer.html # Footer reutilizável
-│   └── tabs/
-│       ├── inicio.html
-│       ├── areas.html
-│       ├── documentos.html
-│       ├── novo_morador.html
-│       ├── contatos.html
-│       ├── vendas.html
-│       └── faq.html
-└── static/
-    ├── css/
-    │   └── styles.css
-    ├── js/
-    │   └── app.js
-    └── assets/          # Imagens, PDFs, ícones
-```
-
-## Como rodar
-
-### 1. Criar ambiente virtual
+### 1. Ambiente virtual + dependências
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate   # macOS/Linux
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt   # inclui pytest/httpx; em prod use requirements.txt
 ```
 
-### 2. Instalar dependências
+### 2. Configurar variáveis de ambiente
 
+Copie o template:
 ```bash
-pip install -r requirements.txt
+cp .env.example .env
 ```
 
-### 3. Popular o banco com dados iniciais (opcional)
+Gere um hash bcrypt para a senha do admin:
+```bash
+python scripts/generate_password_hash.py "suaSenhaForte"
+```
+
+Cole o hash retornado em `.env` na variável `ADMIN_PASSWORD_HASH`. Gere também uma `SECRET_KEY`:
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Exemplo de `.env` válido:
+```
+ADMIN_PASSWORD_HASH=$2b$12$...
+SECRET_KEY=...
+ALLOWED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+```
+
+### 3. Popular banco com dados iniciais (opcional)
 
 ```bash
 python seed.py
 ```
 
-Isso cria o arquivo `data.db` com avisos e vendas de exemplo. Se o banco já tiver dados, o seed é ignorado.
-
-### 4. Iniciar o servidor
+### 4. Rodar
 
 ```bash
 uvicorn main:app --reload --port 8000
 ```
 
-### 5. Acessar
+- Portal: <http://localhost:8000>
+- Admin: <http://localhost:8000/admin>
+- Docs API: <http://localhost:8000/docs>
 
-- **Portal do Morador:** [http://localhost:8000](http://localhost:8000)
-- **Painel Admin:** [http://localhost:8000/admin](http://localhost:8000/admin)
-- **Documentação API:** [http://localhost:8000/docs](http://localhost:8000/docs)
+## Rodar testes
 
-## Painel de Administração
+```bash
+pytest -v
+```
 
-Acesse `/admin` e use a senha `sindico2026` para entrar. No painel é possível:
+## Estrutura
 
-- **Avisos:** Criar e excluir comunicados (exibidos na aba Documentos/Avisos)
-- **Vendas:** Criar, ativar/desativar e excluir produtos de moradores (exibidos na aba Vendas)
-
-As alterações são salvas no banco de dados e refletidas imediatamente no portal.
+```
+site-barra-funda/
+├── main.py                 # App FastAPI + rotas
+├── auth.py                 # JWT, cookies, dependency require_admin
+├── database.py             # SQLite + sessão
+├── models.py               # SQLModel models (Notice, Sale, Area, FAQ)
+├── logging_config.py       # Setup de logging + audit log
+├── seed.py                 # Popula banco com dados iniciais
+├── scripts/
+│   └── generate_password_hash.py   # Helper bcrypt
+├── tests/                  # pytest
+├── templates/
+│   ├── base.html
+│   ├── index.html
+│   ├── admin.html
+│   └── tabs/...
+└── static/
+    ├── css/styles.css
+    ├── js/app.js
+    └── assets/
+```
 
 ## Endpoints da API
 
+### Públicos (GET)
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/notices` | Lista todos os avisos |
-| `POST` | `/api/notices` | Cria um aviso |
-| `PUT` | `/api/notices/{id}` | Atualiza um aviso |
-| `DELETE` | `/api/notices/{id}` | Exclui um aviso |
-| `GET` | `/api/sales` | Lista todas as vendas |
-| `POST` | `/api/sales` | Cria uma venda |
-| `PUT` | `/api/sales/{id}` | Atualiza uma venda |
-| `PATCH` | `/api/sales/{id}/toggle` | Ativa/desativa uma venda |
-| `DELETE` | `/api/sales/{id}` | Exclui uma venda |
-| `POST` | `/api/auth` | Verifica senha do admin |
+| GET | `/api/notices` | Lista avisos |
+| GET | `/api/sales` | Lista vendas |
+| GET | `/api/areas` | Lista áreas |
+| GET | `/api/faqs` | Lista FAQs |
 
-## Hospedagem
+### Auth
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/api/auth` | Login (5/min por IP). Seta cookie `admin_session` |
+| POST | `/api/logout` | Limpa cookie |
+| GET | `/api/me` | Retorna o subject se o cookie é válido |
 
-O projeto pode ser hospedado gratuitamente em:
+### Protegidas (requerem cookie `admin_session`)
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST/PUT/DELETE | `/api/notices[/{id}]` | CRUD avisos |
+| POST/PUT/PATCH/DELETE | `/api/sales[/{id}]` | CRUD vendas |
+| POST/PUT/DELETE | `/api/areas[/{id}]` | CRUD áreas |
+| POST/PUT/DELETE | `/api/faqs[/{id}]` | CRUD FAQs |
+| POST | `/api/upload` | Upload de imagem (5MB máx, jpg/png/webp/gif) |
 
-- **[Render](https://render.com)** — Deploy direto do GitHub, suporte a Python
-- **[Railway](https://railway.app)** — Deploy com SQLite persistente
-- **[Fly.io](https://fly.io)** — Free tier com volumes para o banco
+## Deploy no Render
+
+O deploy usa o `Dockerfile`. Configure as env vars no painel **Settings → Environment**:
+
+```
+ADMIN_PASSWORD_HASH=<hash gerado pelo script>
+SECRET_KEY=<token aleatório>
+ALLOWED_ORIGINS=https://seu-app.onrender.com
+COOKIE_SECURE=true
+```
+
+> `COOKIE_SECURE=true` é **obrigatório em produção** (cookie só transita via HTTPS).
+> Sem `ADMIN_PASSWORD_HASH` ou `SECRET_KEY`, a aplicação não sobe.
+
+### Banco persistente
+
+Atualmente o `data.db` é embarcado na imagem Docker — qualquer alteração feita pelo admin via deploy é **perdida** quando o container reinicia. Para persistência real, mover para um Render Disk ou Postgres.
+
+## Segurança
+
+- ✅ Senha admin hasheada com bcrypt (cost 12)
+- ✅ JWT em cookie httpOnly + SameSite=Strict
+- ✅ Rate limit no login (5/min/IP)
+- ✅ CORS restrito por env var
+- ✅ Headers: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+- ✅ Upload validado (MIME + extensão + tamanho)
+- ✅ Validação de tamanho de inputs (Pydantic max_length)
+- ✅ Audit log de login/logout

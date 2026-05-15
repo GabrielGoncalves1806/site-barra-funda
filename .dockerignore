@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+
+# Python
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode
+.idea
+.DS_Store
+
+# Local secrets (definir no painel do Render)
+.env
+.envrc
+
+# Docs / dev-only
+README.md
+LICENSE
+PLANO_MELHORIAS.md
+exemplos/
+
+# Logs / temp
+*.log
+*.tmp
+.pytest_cache
+.mypy_cache
+
+# NÃO ignorar data.db enquanto deploy no Render for via imagem
+# (banco efêmero shippado junto até migrarmos pra servidor com volume)

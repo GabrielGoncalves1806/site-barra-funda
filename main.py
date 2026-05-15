@@ -1,16 +1,34 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
-import shutil
+import os
 import uuid
 
-from fastapi import FastAPI, Request, Depends, HTTPException, UploadFile, File
+import bcrypt
+from dotenv import load_dotenv
+from fastapi import FastAPI, Request, Depends, HTTPException, UploadFile, File, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select
 
+load_dotenv()
+
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+from starlette.middleware.base import BaseHTTPMiddleware
+
+from auth import (
+    create_access_token,
+    set_session_cookie,
+    clear_session_cookie,
+    require_admin,
+)
 from database import create_db_and_tables, get_session
+from logging_config import setup_logging, audit
+
+setup_logging()
 from models import (
     Notice, NoticeCreate, NoticeUpdate,
     Sale, SaleCreate, SaleUpdate,
@@ -38,12 +56,38 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Portal do Morador", lifespan=lifespan)
 
+# Rate limiter: chave por IP, registrado para uso via decorator.
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# CORS restrito aos domínios configurados em .env (separados por vírgula).
+_origins_env = os.getenv("ALLOWED_ORIGINS", "").strip()
+_allowed_origins = [o.strip() for o in _origins_env.split(",") if o.strip()] or [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_allowed_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_headers=["Content-Type", "Authorization"],
 )
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
@@ -67,7 +111,7 @@ def list_notices(session: Session = Depends(get_session)):
 
 
 @app.post("/api/notices", status_code=201)
-def create_notice(data: NoticeCreate, session: Session = Depends(get_session)):
+def create_notice(data: NoticeCreate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
     notice = Notice(**data.model_dump())
     session.add(notice)
     session.commit()
@@ -76,7 +120,7 @@ def create_notice(data: NoticeCreate, session: Session = Depends(get_session)):
 
 
 @app.put("/api/notices/{notice_id}")
-def update_notice(notice_id: int, data: NoticeUpdate, session: Session = Depends(get_session)):
+def update_notice(notice_id: int, data: NoticeUpdate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
     notice = session.get(Notice, notice_id)
     if not notice:
         raise HTTPException(404, "Aviso não encontrado")
@@ -89,7 +133,7 @@ def update_notice(notice_id: int, data: NoticeUpdate, session: Session = Depends
 
 
 @app.delete("/api/notices/{notice_id}")
-def delete_notice(notice_id: int, session: Session = Depends(get_session)):
+def delete_notice(notice_id: int, session: Session = Depends(get_session), _: str = Depends(require_admin)):
     notice = session.get(Notice, notice_id)
     if not notice:
         raise HTTPException(404, "Aviso não encontrado")
@@ -105,7 +149,7 @@ def list_sales(session: Session = Depends(get_session)):
 
 
 @app.post("/api/sales", status_code=201)
-def create_sale(data: SaleCreate, session: Session = Depends(get_session)):
+def create_sale(data: SaleCreate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
     sale = Sale(**data.model_dump())
     session.add(sale)
     session.commit()
@@ -114,7 +158,7 @@ def create_sale(data: SaleCreate, session: Session = Depends(get_session)):
 
 
 @app.put("/api/sales/{sale_id}")
-def update_sale(sale_id: int, data: SaleUpdate, session: Session = Depends(get_session)):
+def update_sale(sale_id: int, data: SaleUpdate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
     sale = session.get(Sale, sale_id)
     if not sale:
         raise HTTPException(404, "Produto não encontrado")
@@ -127,7 +171,7 @@ def update_sale(sale_id: int, data: SaleUpdate, session: Session = Depends(get_s
 
 
 @app.patch("/api/sales/{sale_id}/toggle")
-def toggle_sale(sale_id: int, session: Session = Depends(get_session)):
+def toggle_sale(sale_id: int, session: Session = Depends(get_session), _: str = Depends(require_admin)):
     sale = session.get(Sale, sale_id)
     if not sale:
         raise HTTPException(404, "Produto não encontrado")
@@ -139,7 +183,7 @@ def toggle_sale(sale_id: int, session: Session = Depends(get_session)):
 
 
 @app.delete("/api/sales/{sale_id}")
-def delete_sale(sale_id: int, session: Session = Depends(get_session)):
+def delete_sale(sale_id: int, session: Session = Depends(get_session), _: str = Depends(require_admin)):
     sale = session.get(Sale, sale_id)
     if not sale:
         raise HTTPException(404, "Produto não encontrado")
@@ -156,7 +200,7 @@ def list_areas(session: Session = Depends(get_session)):
 
 
 @app.post("/api/areas", status_code=201)
-def create_area(data: AreaCreate, session: Session = Depends(get_session)):
+def create_area(data: AreaCreate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
     area = Area(**data.model_dump())
     session.add(area)
     session.commit()
@@ -165,7 +209,7 @@ def create_area(data: AreaCreate, session: Session = Depends(get_session)):
 
 
 @app.put("/api/areas/{area_id}")
-def update_area(area_id: int, data: AreaUpdate, session: Session = Depends(get_session)):
+def update_area(area_id: int, data: AreaUpdate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
     area = session.get(Area, area_id)
     if not area:
         raise HTTPException(404, "Área não encontrada")
@@ -178,7 +222,7 @@ def update_area(area_id: int, data: AreaUpdate, session: Session = Depends(get_s
 
 
 @app.delete("/api/areas/{area_id}")
-def delete_area(area_id: int, session: Session = Depends(get_session)):
+def delete_area(area_id: int, session: Session = Depends(get_session), _: str = Depends(require_admin)):
     area = session.get(Area, area_id)
     if not area:
         raise HTTPException(404, "Área não encontrada")
@@ -195,7 +239,7 @@ def list_faqs(session: Session = Depends(get_session)):
 
 
 @app.post("/api/faqs", status_code=201)
-def create_faq(data: FAQCreate, session: Session = Depends(get_session)):
+def create_faq(data: FAQCreate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
     faq = FAQ(**data.model_dump())
     session.add(faq)
     session.commit()
@@ -204,7 +248,7 @@ def create_faq(data: FAQCreate, session: Session = Depends(get_session)):
 
 
 @app.put("/api/faqs/{faq_id}")
-def update_faq(faq_id: int, data: FAQUpdate, session: Session = Depends(get_session)):
+def update_faq(faq_id: int, data: FAQUpdate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
     faq = session.get(FAQ, faq_id)
     if not faq:
         raise HTTPException(404, "FAQ não encontrada")
@@ -217,7 +261,7 @@ def update_faq(faq_id: int, data: FAQUpdate, session: Session = Depends(get_sess
 
 
 @app.delete("/api/faqs/{faq_id}")
-def delete_faq(faq_id: int, session: Session = Depends(get_session)):
+def delete_faq(faq_id: int, session: Session = Depends(get_session), _: str = Depends(require_admin)):
     faq = session.get(FAQ, faq_id)
     if not faq:
         raise HTTPException(404, "FAQ não encontrada")
@@ -227,13 +271,34 @@ def delete_faq(faq_id: int, session: Session = Depends(get_session)):
 
 
 # ── Upload de arquivos ───────────────────────────────────
+ALLOWED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+ALLOWED_IMAGE_MIME = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
+
+
 def save_upload_file(upload: UploadFile) -> str:
     ensure_upload_dir()
     extension = Path(upload.filename or "").suffix.lower()
+
+    if extension not in ALLOWED_IMAGE_EXTS:
+        raise HTTPException(400, f"Extensão não permitida. Use: {', '.join(sorted(ALLOWED_IMAGE_EXTS))}")
+
+    if upload.content_type not in ALLOWED_IMAGE_MIME:
+        raise HTTPException(400, "Tipo de arquivo inválido (apenas imagens).")
+
     filename = f"{uuid.uuid4().hex}{extension}"
     destination = UPLOAD_DIR / filename
+
+    size = 0
     with destination.open("wb") as buffer:
-        shutil.copyfileobj(upload.file, buffer)
+        while chunk := upload.file.read(64 * 1024):
+            size += len(chunk)
+            if size > MAX_UPLOAD_SIZE_BYTES:
+                buffer.close()
+                destination.unlink(missing_ok=True)
+                raise HTTPException(413, f"Arquivo maior que {MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)} MB.")
+            buffer.write(chunk)
+
     return f"/static/uploads/{filename}"
 
 
@@ -249,19 +314,52 @@ def remove_uploaded_file(url: str | None):
 
 
 @app.post("/api/upload")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(file: UploadFile = File(...), _: str = Depends(require_admin)):
     if not file.filename:
         raise HTTPException(400, "Arquivo inválido")
     url = save_upload_file(file)
     return {"url": url}
 
 
-# ── Auth simples (verificação de senha) ──────────────────
-ADMIN_PASSWORD = "sindico2026"
+# ── Auth (login + JWT em cookie httpOnly) ────────────────
+ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH", "")
+
+if not ADMIN_PASSWORD_HASH:
+    raise RuntimeError(
+        "ADMIN_PASSWORD_HASH não configurado. Crie um .env baseado no .env.example "
+        "e gere o hash com scripts/generate_password_hash.py."
+    )
 
 
 @app.post("/api/auth")
-def auth_check(request_body: dict):
-    if request_body.get("password") == ADMIN_PASSWORD:
-        return {"ok": True}
-    raise HTTPException(401, "Senha incorreta")
+@limiter.limit("5/minute")
+def auth_check(request: Request, request_body: dict, response: Response):
+    client_ip = request.client.host if request.client else "unknown"
+    password = request_body.get("password", "")
+    if not isinstance(password, str):
+        audit("login_failed", ip=client_ip, reason="invalid_payload")
+        raise HTTPException(401, "Senha incorreta")
+    try:
+        ok = bcrypt.checkpw(password.encode("utf-8"), ADMIN_PASSWORD_HASH.encode("utf-8"))
+    except (ValueError, TypeError):
+        ok = False
+    if not ok:
+        audit("login_failed", ip=client_ip)
+        raise HTTPException(401, "Senha incorreta")
+
+    token = create_access_token(subject="admin")
+    set_session_cookie(response, token)
+    audit("login_success", ip=client_ip)
+    return {"ok": True}
+
+
+@app.post("/api/logout")
+def logout(response: Response):
+    clear_session_cookie(response)
+    audit("logout")
+    return {"ok": True}
+
+
+@app.get("/api/me")
+def me(subject: str = Depends(require_admin)):
+    return {"subject": subject}

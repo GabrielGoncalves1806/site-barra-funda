@@ -92,7 +92,7 @@
       background: rgba(255, 255, 255, .08);
       color: white;
       border-radius: 10px;
-      font-size: 14px;
+      font-size: 16px;
       font-family: inherit;
     }
 
@@ -174,8 +174,8 @@
     }
 
     .btn-icon {
-      width: 36px;
-      height: 36px;
+      width: 44px;
+      height: 44px;
       border-radius: 10px;
       border: none;
       background: rgba(255, 255, 255, .1);
@@ -263,6 +263,40 @@
 
       .admin-tabs {
         flex-wrap: wrap;
+      }
+
+      .admin-container {
+        padding: 24px 16px;
+      }
+
+      .admin-card {
+        padding: 16px;
+      }
+
+      .admin-header h1 {
+        font-size: 22px;
+      }
+
+      .item-row {
+        flex-wrap: wrap;
+        padding: 12px 14px;
+      }
+
+      .item-row__info {
+        min-width: 100%;
+      }
+
+      .item-row__actions {
+        margin-left: auto;
+      }
+
+      .btn-row {
+        flex-wrap: wrap;
+      }
+
+      .btn-row .btn-admin {
+        flex: 1;
+        min-width: 120px;
       }
     }
   </style>
@@ -516,17 +550,44 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    async function checkAuth() {
-      const auth = localStorage.getItem('admin_auth');
-      if (auth === 'true') {
-        document.getElementById('loginOverlay').classList.add('hidden');
-        document.getElementById('adminPanel').classList.remove('hidden');
-        await loadData();
+    // Wrapper de fetch: detecta 401 e mostra login automaticamente.
+    const _rawFetch = window.fetch.bind(window);
+    window.fetch = async (...args) => {
+      const res = await _rawFetch(...args);
+      const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+      if (res.status === 401 && url.includes('/api/') && !url.endsWith('/api/auth')) {
+        showLoginOverlay('Sessão expirada. Faça login novamente.');
+      }
+      return res;
+    };
+
+    function showLoginOverlay(message) {
+      document.getElementById('adminPanel').classList.add('hidden');
+      document.getElementById('loginOverlay').classList.remove('hidden');
+      if (message) {
+        const err = document.getElementById('loginError');
+        err.textContent = message;
+        err.style.display = 'block';
       }
     }
 
-    function logout() {
-      localStorage.removeItem('admin_auth');
+    async function checkAuth() {
+      try {
+        const res = await _rawFetch('/api/me');
+        if (res.ok) {
+          document.getElementById('loginOverlay').classList.add('hidden');
+          document.getElementById('adminPanel').classList.remove('hidden');
+          await loadData();
+        }
+      } catch (err) {
+        // Sem sessão: overlay já visível por padrão.
+      }
+    }
+
+    async function logout() {
+      try {
+        await _rawFetch('/api/logout', { method: 'POST' });
+      } catch (err) { }
       location.reload();
     }
 
@@ -534,16 +595,19 @@
       e.preventDefault();
       const pwd = document.getElementById('adminPassword').value;
       try {
-        const res = await fetch('/api/auth', {
+        const res = await _rawFetch('/api/auth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password: pwd })
         });
         if (res.ok) {
-          localStorage.setItem('admin_auth', 'true');
+          document.getElementById('loginError').style.display = 'none';
+          document.getElementById('adminPassword').value = '';
           await checkAuth();
         } else {
-          document.getElementById('loginError').style.display = 'block';
+          const err = document.getElementById('loginError');
+          err.textContent = 'Senha incorreta. Tente novamente.';
+          err.style.display = 'block';
         }
       } catch (err) {
         document.getElementById('loginError').style.display = 'block';
