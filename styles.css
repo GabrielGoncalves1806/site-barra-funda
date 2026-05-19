@@ -1344,6 +1344,19 @@ h1 {
 .contact__v {
   font-weight: 700;
   font-size: 14px;
+  color: inherit;
+  text-decoration: none;
+}
+
+a.contact__v:hover,
+.contact__v a:hover {
+  color: #25d366;
+  text-decoration: underline;
+}
+
+.contact__v a {
+  color: inherit;
+  text-decoration: none;
 }
 
 .divider {
