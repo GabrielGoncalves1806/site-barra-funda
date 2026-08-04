@@ -76,6 +76,20 @@ if (searchForm && searchInput) {
   });
 }
 
+// ===== SANITIZAÇÃO =====
+// Todo conteúdo vindo da API (avisos, vendas, áreas, FAQs) é texto livre
+// cadastrado via painel admin — precisa ser escapado antes de virar HTML,
+// senão um campo com "<script>" executa pra todo mundo que visita o site.
+function escapeHTML(value) {
+  if (value === null || value === undefined) return "";
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // ===== ÁREAS COMUNS (carregadas da API) =====
 let AREA_DETAILS = {};
 
@@ -100,13 +114,13 @@ function populateModal(data) {
   modalTag.textContent = data.tag;
   modalTitle.textContent = data.title;
   modalDescription.textContent = data.description;
-  modalHighlights.innerHTML = highlights.map(item => `<li>${item}</li>`).join("");
+  modalHighlights.innerHTML = highlights.map(item => `<li>${escapeHTML(item)}</li>`).join("");
   modalMeta.innerHTML = meta.map(item => {
     if (/^https?:\/\//.test(item)) {
       const display = item.replace(/^https?:\/\//, '');
-      return `<span><a href="${item}" target="_blank" rel="noopener noreferrer" style="pointer-events:auto">${display}</a></span>`;
+      return `<span><a href="${escapeHTML(item)}" target="_blank" rel="noopener noreferrer" style="pointer-events:auto">${escapeHTML(display)}</a></span>`;
     }
-    return `<span>${item}</span>`;
+    return `<span>${escapeHTML(item)}</span>`;
   }).join("");
 }
 
@@ -152,10 +166,10 @@ function renderAreaCards(areas) {
     card.setAttribute("tabindex", "0");
     card.setAttribute("aria-label", `Ver detalhes de ${area.title}`);
     card.innerHTML = `
-      <img src="${area.image}" alt="${area.title}" loading="lazy" />
+      <img src="${escapeHTML(area.image)}" alt="${escapeHTML(area.title)}" loading="lazy" />
       <div class="card__body">
-        <h3>${area.title}</h3>
-        <ul>${rules.map(r => `<li>${r}</li>`).join("")}</ul>
+        <h3>${escapeHTML(area.title)}</h3>
+        <ul>${rules.map(r => `<li>${escapeHTML(r)}</li>`).join("")}</ul>
       </div>
     `;
     bindAreaCard(card);
@@ -189,8 +203,8 @@ function renderFAQs(faqs) {
     const details = document.createElement("details");
     if (faq.anchor_id) details.id = faq.anchor_id;
     details.innerHTML = `
-      <summary>${faq.icon} ${faq.question}</summary>
-      <p>${faq.answer}</p>
+      <summary>${escapeHTML(faq.icon)} ${escapeHTML(faq.question)}</summary>
+      <p>${escapeHTML(faq.answer)}</p>
     `;
     root.appendChild(details);
   });
@@ -296,11 +310,11 @@ function renderNotices(notices) {
       el.innerHTML = `
         <div class="notice__top">
           <span class="${b.cls}">${b.label}</span>
-          <span class="badge">${n.author}</span>
+          <span class="badge">${escapeHTML(n.author)}</span>
         </div>
-        <h3>${n.title}</h3>
-        <p>${n.text}</p>
-        <div class="notice__meta">${n.date}</div>
+        <h3>${escapeHTML(n.title)}</h3>
+        <p>${escapeHTML(n.text)}</p>
+        <div class="notice__meta">${escapeHTML(n.date)}</div>
       `;
       root.appendChild(el);
     });
@@ -340,13 +354,13 @@ function renderSales(sales) {
     const card = document.createElement("article");
     card.className = "sale-card";
     card.innerHTML = `
-      <img class="sale-card__image" src="${item.image}" alt="${item.title}" onerror="this.src='/static/assets/placeholder-sale.svg'" />
+      <img class="sale-card__image" src="${escapeHTML(item.image)}" alt="${escapeHTML(item.title)}" onerror="this.src='/static/assets/placeholder-sale.svg'" />
       <div class="sale-card__body">
-        <h3 class="sale-card__title">${item.title}</h3>
-        <p class="sale-card__description">${item.description}</p>
-        <span class="sale-card__price">${item.price}</span>
-        <p class="sale-card__seller">📍 ${item.seller}</p>
-        <a class="sale-card__whatsapp" href="https://wa.me/${item.whatsapp}?text=Olá! Vi seu anúncio de ${encodeURIComponent(item.title)} no portal do condomínio." target="_blank" rel="noreferrer">
+        <h3 class="sale-card__title">${escapeHTML(item.title)}</h3>
+        <p class="sale-card__description">${escapeHTML(item.description)}</p>
+        <span class="sale-card__price">${escapeHTML(item.price)}</span>
+        <p class="sale-card__seller">📍 ${escapeHTML(item.seller)}</p>
+        <a class="sale-card__whatsapp" href="https://wa.me/${encodeURIComponent(item.whatsapp)}?text=Olá! Vi seu anúncio de ${encodeURIComponent(item.title)} no portal do condomínio." target="_blank" rel="noreferrer">
           📱 Chamar no WhatsApp
         </a>
       </div>

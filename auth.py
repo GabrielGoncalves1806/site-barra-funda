@@ -21,6 +21,21 @@ def _secret_key() -> str:
     return key
 
 
+def _cookie_secure() -> bool:
+    """Exige COOKIE_SECURE explícito (sem default silencioso).
+
+    Um default 'false' silencioso faria o cookie de sessão viajar em HTTP
+    puro se alguém esquecesse de configurar isso em produção.
+    """
+    value = os.getenv("COOKIE_SECURE")
+    if value is None:
+        raise RuntimeError(
+            "COOKIE_SECURE não configurado no .env. Use 'true' em produção "
+            "(exige HTTPS) ou 'false' apenas em desenvolvimento local sem HTTPS."
+        )
+    return value.strip().lower() == "true"
+
+
 def create_access_token(subject: str = "admin") -> str:
     """Gera um JWT assinado válido por TOKEN_TTL_HOURS."""
     now = datetime.now(tz=timezone.utc)
@@ -39,7 +54,7 @@ def set_session_cookie(response: Response, token: str) -> None:
         value=token,
         max_age=TOKEN_TTL_HOURS * 3600,
         httponly=True,
-        secure=os.getenv("COOKIE_SECURE", "false").lower() == "true",
+        secure=_cookie_secure(),
         samesite="strict",
         path="/",
     )

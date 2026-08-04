@@ -543,6 +543,19 @@
       return JSON.stringify(text.split('\n').map(l => l.trim()).filter(Boolean));
     }
 
+    // Escapa texto vindo da API antes de injetar via innerHTML — campos são
+    // texto livre e um valor com "<script>" salvo via API executaria aqui
+    // dentro da própria sessão do admin.
+    function escapeHTML(value) {
+      if (value === null || value === undefined) return "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.textContent = msg;
@@ -670,8 +683,8 @@
       list.innerHTML = notices.map(n => `
         <div class="item-row">
           <div class="item-row__info">
-            <div class="item-row__title">${n.title}</div>
-            <div class="item-row__meta">${n.level.toUpperCase()} • ${n.author} • ${n.date}</div>
+            <div class="item-row__title">${escapeHTML(n.title)}</div>
+            <div class="item-row__meta">${escapeHTML(n.level.toUpperCase())} • ${escapeHTML(n.author)} • ${escapeHTML(n.date)}</div>
           </div>
           <div class="item-row__actions">
             <button class="btn-icon" onclick="editNotice(${n.id})" title="Editar">✏️</button>
@@ -690,8 +703,8 @@
       list.innerHTML = sales.map(s => `
         <div class="item-row">
           <div class="item-row__info">
-            <div class="item-row__title">${s.title} - ${s.price}</div>
-            <div class="item-row__meta">${s.seller} • ${s.active ? '✅ Ativo' : '❌ Inativo'}</div>
+            <div class="item-row__title">${escapeHTML(s.title)} - ${escapeHTML(s.price)}</div>
+            <div class="item-row__meta">${escapeHTML(s.seller)} • ${s.active ? '✅ Ativo' : '❌ Inativo'}</div>
           </div>
           <div class="item-row__actions">
             <button class="btn-icon" onclick="editSale(${s.id})" title="Editar">✏️</button>
@@ -828,8 +841,8 @@
       list.innerHTML = areas.map(a => `
         <div class="item-row">
           <div class="item-row__info">
-            <div class="item-row__title">${a.title}</div>
-            <div class="item-row__meta">${a.slug} • ${a.tag} • Ordem: ${a.display_order}</div>
+            <div class="item-row__title">${escapeHTML(a.title)}</div>
+            <div class="item-row__meta">${escapeHTML(a.slug)} • ${escapeHTML(a.tag)} • Ordem: ${a.display_order}</div>
           </div>
           <div class="item-row__actions">
             <button class="btn-icon" onclick="editArea(${a.id})" title="Editar">✏️</button>
@@ -913,8 +926,8 @@
       list.innerHTML = faqs.map(f => `
         <div class="item-row">
           <div class="item-row__info">
-            <div class="item-row__title">${f.icon} ${f.question}</div>
-            <div class="item-row__meta">${f.anchor_id || '—'} • Ordem: ${f.display_order}</div>
+            <div class="item-row__title">${escapeHTML(f.icon)} ${escapeHTML(f.question)}</div>
+            <div class="item-row__meta">${escapeHTML(f.anchor_id) || '—'} • Ordem: ${f.display_order}</div>
           </div>
           <div class="item-row__actions">
             <button class="btn-icon" onclick="editFaq(${f.id})" title="Editar">✏️</button>

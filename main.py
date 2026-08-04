@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from contextlib import asynccontextmanager
 from pathlib import Path
 import os
@@ -16,6 +18,7 @@ load_dotenv()
 
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -56,10 +59,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Portal do Morador", lifespan=lifespan)
 
-# Rate limiter: chave por IP, registrado para uso via decorator.
-limiter = Limiter(key_func=get_remote_address)
+# Rate limiter: chave por IP. Limite default cobre TODAS as rotas (inclusive
+# GETs públicos, que não tinham proteção nenhuma antes); /api/auth mantém o
+# limite mais restrito via decorator próprio.
+limiter = Limiter(key_func=get_remote_address, default_limits=["120/minute"])
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 # CORS restrito aos domínios configurados em .env (separados por vírgula).
 _origins_env = os.getenv("ALLOWED_ORIGINS", "").strip()
@@ -96,12 +102,12 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 # ── Páginas ──────────────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
 async def page_home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 
 @app.get("/admin", response_class=HTMLResponse)
 async def page_admin(request: Request):
-    return templates.TemplateResponse("admin.html", {"request": request})
+    return templates.TemplateResponse(request, "admin.html")
 
 
 # ── API: Avisos ──────────────────────────────────────────
@@ -305,7 +311,11 @@ def save_upload_file(upload: UploadFile) -> str:
 def remove_uploaded_file(url: str | None):
     if not url or not url.startswith("/static/uploads/"):
         return
-    file_path = Path(url.lstrip("/"))
+    file_path = (BASE_DIR / url.lstrip("/")).resolve()
+    try:
+        file_path.relative_to(UPLOAD_DIR.resolve())
+    except ValueError:
+        return
     try:
         if file_path.exists():
             file_path.unlink()

@@ -60,3 +60,34 @@ def test_security_headers_presentes(client):
     assert res.headers.get("x-content-type-options") == "nosniff"
     assert res.headers.get("x-frame-options") == "DENY"
     assert "referrer-policy" in res.headers
+
+
+def test_remove_uploaded_file_bloqueia_path_traversal():
+    import main
+
+    outside = main.BASE_DIR.parent / "escaped_by_test.txt"
+    outside.write_text("should not be deleted")
+    try:
+        main.remove_uploaded_file("/static/uploads/../../escaped_by_test.txt")
+        assert outside.exists(), "path traversal apagou arquivo fora de UPLOAD_DIR"
+    finally:
+        outside.unlink(missing_ok=True)
+
+
+def test_remove_uploaded_file_apaga_arquivo_legitimo():
+    import main
+
+    main.ensure_upload_dir()
+    legit = main.UPLOAD_DIR / "legit-test-file.jpg"
+    legit.write_text("conteudo")
+    main.remove_uploaded_file("/static/uploads/legit-test-file.jpg")
+    assert not legit.exists()
+
+
+def test_rate_limit_global_cobre_rotas_publicas(client):
+    # Default de 120/min do Limiter cobre TODAS as rotas, não só /api/auth.
+    for _ in range(120):
+        res = client.get("/api/notices")
+        assert res.status_code == 200
+    res = client.get("/api/notices")
+    assert res.status_code == 429
