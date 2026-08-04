@@ -44,6 +44,7 @@ Exemplo de `.env` válido:
 ADMIN_PASSWORD_HASH=$2b$12$...
 SECRET_KEY=...
 ALLOWED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+COOKIE_SECURE=false
 ```
 
 ### 3. Popular banco com dados iniciais (opcional)
@@ -130,19 +131,42 @@ COOKIE_SECURE=true
 ```
 
 > `COOKIE_SECURE=true` é **obrigatório em produção** (cookie só transita via HTTPS).
-> Sem `ADMIN_PASSWORD_HASH` ou `SECRET_KEY`, a aplicação não sobe.
+> Sem `ADMIN_PASSWORD_HASH`, `SECRET_KEY` ou `COOKIE_SECURE`, a aplicação não sobe —
+> as três são exigidas explicitamente, sem default silencioso.
 
 ### Banco persistente
 
-Atualmente o `data.db` é embarcado na imagem Docker — qualquer alteração feita pelo admin via deploy é **perdida** quando o container reinicia. Para persistência real, mover para um Render Disk ou Postgres.
+Atualmente o `data.db` é embarcado na imagem Docker — qualquer alteração feita pelo admin via deploy é **perdida** quando o container reinicia. Para persistência real, mover para um Render Disk ou Postgres, ou migrar pra VPS (ver abaixo).
+
+## Deploy em VPS
+
+`scripts/deploy_vps.py` faz o bootstrap completo numa VM Ubuntu 22.04 (systemd + Nginx + venv). Idempotente — pode rodar de novo pra atualizar.
+
+```bash
+sudo REPO_URL=https://github.com/USER/site-barra-funda.git \
+     ADMIN_PASSWORD='senha-forte' \
+     PUBLIC_HOST='seu-dominio.com' \
+     LETSENCRYPT_EMAIL='voce@email.com' \
+     python3 deploy_vps.py
+```
+
+Com `PUBLIC_HOST` apontando pra um domínio real (DNS já configurado), o script:
+- Configura HTTPS automaticamente via certbot (Let's Encrypt) e liga `COOKIE_SECURE`.
+- Guarda `data.db` em `/var/lib/<service>/` — **fora** do checkout git, pra um `git pull` de atualização nunca poder sobrescrever o banco de produção.
+- Ativa backup diário do SQLite (retenção de 14 dias, local na VM — copiar pra fora, ex. S3, ainda é manual).
+- Habilita UFW (22/80/443) e fail2ban.
+
+Sem `PUBLIC_HOST` (só IP), o site sobe em HTTP puro — funciona, mas não é recomendado pra produção real (ver detalhes no cabeçalho do script).
 
 ## Segurança
 
 - ✅ Senha admin hasheada com bcrypt (cost 12)
 - ✅ JWT em cookie httpOnly + SameSite=Strict
-- ✅ Rate limit no login (5/min/IP)
+- ✅ Rate limit no login (5/min/IP) + rate limit global (120/min/IP) em todas as rotas
 - ✅ CORS restrito por env var
 - ✅ Headers: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
-- ✅ Upload validado (MIME + extensão + tamanho)
+- ✅ Upload validado (MIME + extensão + tamanho) e proteção contra path traversal na remoção de arquivos
 - ✅ Validação de tamanho de inputs (Pydantic max_length)
+- ✅ Conteúdo de avisos/vendas/áreas/FAQs escapado antes de ir pro DOM (evita XSS armazenado)
+- ✅ Dependências sem CVEs conhecidas (checado com `pip-audit`)
 - ✅ Audit log de login/logout
