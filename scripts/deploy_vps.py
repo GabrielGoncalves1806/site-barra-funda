@@ -7,7 +7,14 @@ Uso típico:
     # No seu Mac, mande o script pra VM:
     scp scripts/deploy_vps.py ubuntu@SEU_IP:/tmp/
 
-    # Na VM:
+    # Na VM (com domínio, recomendado — habilita HTTPS automaticamente):
+    sudo REPO_URL=https://github.com/USER/site-barra-funda.git \\
+         ADMIN_PASSWORD='senha-forte' \\
+         PUBLIC_HOST='seu-dominio.com' \\
+         LETSENCRYPT_EMAIL='voce@email.com' \\
+         python3 /tmp/deploy_vps.py
+
+    # Só com IP (sem domínio, fica em HTTP — não recomendado pra produção real):
     sudo REPO_URL=https://github.com/USER/site-barra-funda.git \\
          ADMIN_PASSWORD='senha-forte' \\
          python3 /tmp/deploy_vps.py
@@ -18,11 +25,13 @@ Variáveis suportadas (env ou flags --repo-url etc.):
     APP_DIR           default: /opt/barra-funda
     APP_USER          default: ubuntu
     SERVICE_NAME      default: barra-funda
-    PUBLIC_HOST       default: _ (qualquer host); pode setar o IP/dominio
+    PUBLIC_HOST       default: _ (qualquer host); defina um domínio real pra habilitar HTTPS
+    LETSENCRYPT_EMAIL opcional; usado pelo certbot pra avisos de expiração de certificado
 
 Pré-condições:
     - Ubuntu 22.04 LTS com acesso à internet
-    - Regra de Ingress TCP/80 liberada na Security List da VCN (console Oracle)
+    - Regras de Ingress TCP/80 e TCP/443 liberadas na Security List da VCN (console Oracle)
+    - Se for usar HTTPS: DNS do domínio já apontando pro IP da VM
 """
 from __future__ import annotations
 
@@ -58,18 +67,32 @@ def apt_install(packages: list[str]) -> None:
     subprocess.run(["apt-get", "install", "-y", "-qq", *packages], check=True, env=env)
 
 
-def open_port_80() -> None:
+def open_firewall_ports() -> None:
     # Oracle Ubuntu vem com iptables bloqueando tudo fora 22. Insere regra
     # antes do REJECT genérico e persiste com netfilter-persistent.
-    result = subprocess.run(
-        ["iptables", "-C", "INPUT", "-p", "tcp", "--dport", "80", "-j", "ACCEPT"],
-        capture_output=True,
-    )
-    if result.returncode != 0:
-        run(["iptables", "-I", "INPUT", "6", "-m", "state", "--state", "NEW",
-             "-p", "tcp", "--dport", "80", "-j", "ACCEPT"])
+    for port in ("80", "443"):
+        result = subprocess.run(
+            ["iptables", "-C", "INPUT", "-p", "tcp", "--dport", port, "-j", "ACCEPT"],
+            capture_output=True,
+        )
+        if result.returncode != 0:
+            run(["iptables", "-I", "INPUT", "6", "-m", "state", "--state", "NEW",
+                 "-p", "tcp", "--dport", port, "-j", "ACCEPT"])
     if shutil.which("netfilter-persistent"):
         run(["netfilter-persistent", "save"], check=False)
+
+
+def setup_ufw() -> None:
+    if not shutil.which("ufw"):
+        return
+    for rule in ("22/tcp", "80/tcp", "443/tcp"):
+        run(["ufw", "allow", rule], check=False)
+    run(["ufw", "--force", "enable"], check=False)
+
+
+def setup_fail2ban() -> None:
+    if shutil.which("fail2ban-client"):
+        run(["systemctl", "enable", "--now", "fail2ban"], check=False)
 
 
 def ensure_repo(app_dir: Path, app_user: str, repo_url: str) -> None:
@@ -106,7 +129,58 @@ def bcrypt_hash(venv: Path, app_user: str, password: str) -> str:
     return result.stdout.strip()
 
 
-def write_env_file(app_dir: Path, app_user: str, password: str | None, public_host: str) -> None:
+def ensure_data_dir(data_dir: Path, app_user: str) -> None:
+    """Diretório de dados FORA da árvore do git — um `git pull` nunca deve
+    poder sobrescrever o banco de produção."""
+    data_dir.mkdir(parents=True, exist_ok=True)
+    (data_dir / "backups").mkdir(exist_ok=True)
+    run(["chown", "-R", f"{app_user}:{app_user}", str(data_dir)])
+    os.chmod(data_dir, 0o750)
+
+
+def migrate_legacy_db(app_dir: Path, data_dir: Path, app_user: str) -> None:
+    """Compatibilidade com deploys antigos que tinham data.db dentro do checkout git."""
+    legacy_db = app_dir / "data.db"
+    new_db = data_dir / "data.db"
+    if legacy_db.exists() and not new_db.exists():
+        print(f"→ Migrando data.db existente de {legacy_db} para {new_db}")
+        shutil.move(str(legacy_db), str(new_db))
+        run(["chown", f"{app_user}:{app_user}", str(new_db)])
+
+
+def setup_tls(public_host: str, email: str | None) -> bool:
+    """Tenta obter certificado via certbot. Retorna True se HTTPS ficou ativo.
+
+    Let's Encrypt não emite certificado pra IP puro, só pra domínio — por
+    isso isso só roda quando PUBLIC_HOST é um domínio real.
+    """
+    if public_host == "_":
+        print("→ PUBLIC_HOST não é um domínio — pulando TLS. Sem domínio o "
+              "Let's Encrypt não emite certificado; o site fica em HTTP puro "
+              "(não recomendado pra produção real).")
+        return False
+
+    email_args = ["-m", email, "--no-eff-email"] if email else ["--register-unsafely-without-email"]
+    result = run(
+        ["certbot", "--nginx", "-d", public_host, "--non-interactive", "--agree-tos",
+         "--redirect", *email_args],
+        check=False,
+    )
+    if result.returncode != 0:
+        print("⚠ certbot falhou — seguindo em HTTP. Rode `certbot --nginx` "
+              "manualmente depois de conferir o DNS do domínio.")
+        return False
+    return True
+
+
+def write_env_file(
+    app_dir: Path,
+    app_user: str,
+    password: str | None,
+    public_host: str,
+    data_dir: Path,
+    tls_enabled: bool,
+) -> None:
     env_path = app_dir / ".env"
     existing: dict[str, str] = {}
     if env_path.exists():
@@ -124,7 +198,14 @@ def write_env_file(app_dir: Path, app_user: str, password: str | None, public_ho
     elif "ADMIN_PASSWORD_HASH" not in existing:
         sys.exit("ADMIN_PASSWORD precisa ser fornecido na primeira execução.")
 
-    origin = "http://" + (public_host if public_host != "_" else "localhost")
+    # Derivados do que a infra realmente provê nesta execução — não usar
+    # setdefault, senão um estado antigo (ex.: COOKIE_SECURE=false de antes
+    # de configurar TLS) nunca seria corrigido em runs futuros.
+    existing["DATABASE_URL"] = f"sqlite:///{data_dir / 'data.db'}"
+    existing["COOKIE_SECURE"] = "true" if tls_enabled else "false"
+
+    scheme = "https" if tls_enabled else "http"
+    origin = f"{scheme}://" + (public_host if public_host != "_" else "localhost")
     existing.setdefault("ALLOWED_ORIGINS", origin)
 
     lines = [f"{k}={v}" for k, v in existing.items()]
@@ -189,6 +270,48 @@ def write_nginx_conf(service_name: str, app_dir: Path, public_host: str) -> None
     run(["systemctl", "reload", "nginx"])
 
 
+def write_backup_timer(data_dir: Path, service_name: str, app_user: str) -> None:
+    """Backup diário do SQLite via `.backup` (consistente mesmo com o app rodando)
+    + rotação de 14 dias. Fica local na VPS — copiar pra fora (S3/Backblaze/etc.)
+    ainda é recomendado manualmente, o script não assume nenhuma credencial."""
+    backup_dir = data_dir / "backups"
+    script_path = Path(f"/usr/local/bin/{service_name}-backup.sh")
+    script = dedent(f"""\
+        #!/bin/sh
+        set -e
+        STAMP=$(date +%Y%m%d-%H%M%S)
+        sqlite3 {data_dir}/data.db ".backup '{backup_dir}/data-$STAMP.db'"
+        find {backup_dir} -name 'data-*.db' -mtime +14 -delete
+    """)
+    script_path.write_text(script)
+    os.chmod(script_path, 0o755)
+
+    service_unit = dedent(f"""\
+        [Unit]
+        Description=Backup diário do SQLite ({service_name})
+
+        [Service]
+        Type=oneshot
+        User={app_user}
+        ExecStart={script_path}
+    """)
+    timer_unit = dedent(f"""\
+        [Unit]
+        Description=Agenda o backup diário do {service_name}
+
+        [Timer]
+        OnCalendar=daily
+        Persistent=true
+
+        [Install]
+        WantedBy=timers.target
+    """)
+    Path(f"/etc/systemd/system/{service_name}-backup.service").write_text(service_unit)
+    Path(f"/etc/systemd/system/{service_name}-backup.timer").write_text(timer_unit)
+    run(["systemctl", "daemon-reload"])
+    run(["systemctl", "enable", "--now", f"{service_name}-backup.timer"])
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Deploy do site na VPS")
     parser.add_argument("--repo-url", default=os.getenv("REPO_URL"))
@@ -197,6 +320,8 @@ def main() -> None:
     parser.add_argument("--app-user", default=os.getenv("APP_USER", "ubuntu"))
     parser.add_argument("--service-name", default=os.getenv("SERVICE_NAME", "barra-funda"))
     parser.add_argument("--public-host", default=os.getenv("PUBLIC_HOST", "_"))
+    parser.add_argument("--letsencrypt-email", default=os.getenv("LETSENCRYPT_EMAIL"))
+    parser.add_argument("--data-dir", default=os.getenv("DATA_DIR"))
     args = parser.parse_args()
 
     if not args.repo_url:
@@ -204,12 +329,18 @@ def main() -> None:
 
     require_root()
     app_dir = Path(args.app_dir)
+    data_dir = Path(args.data_dir) if args.data_dir else Path(f"/var/lib/{args.service_name}")
 
     print("→ Instalando pacotes do sistema")
-    apt_install(["python3-venv", "python3-pip", "git", "nginx", "iptables-persistent"])
+    apt_install([
+        "python3-venv", "python3-pip", "git", "nginx", "iptables-persistent",
+        "certbot", "python3-certbot-nginx", "sqlite3", "ufw", "fail2ban",
+    ])
 
-    print("→ Liberando porta 80 no firewall do OS")
-    open_port_80()
+    print("→ Liberando portas 80/443 no firewall do OS")
+    open_firewall_ports()
+    setup_ufw()
+    setup_fail2ban()
 
     print("→ Clonando/atualizando repositório")
     ensure_repo(app_dir, args.app_user, args.repo_url)
@@ -217,19 +348,34 @@ def main() -> None:
     print("→ Criando venv e instalando dependências")
     ensure_venv(app_dir, args.app_user)
 
+    print("→ Preparando diretório de dados persistente (fora do git)")
+    ensure_data_dir(data_dir, args.app_user)
+    migrate_legacy_db(app_dir, data_dir, args.app_user)
+
+    print("→ Configurando Nginx (HTTP)")
+    write_nginx_conf(args.service_name, app_dir, args.public_host)
+
+    print("→ Configurando HTTPS (certbot)")
+    tls_enabled = setup_tls(args.public_host, args.letsencrypt_email)
+
     print("→ Escrevendo .env (gera SECRET_KEY/hash se necessário)")
-    write_env_file(app_dir, args.app_user, args.admin_password, args.public_host)
+    write_env_file(app_dir, args.app_user, args.admin_password, args.public_host, data_dir, tls_enabled)
 
     print("→ Configurando systemd")
     write_systemd_unit(args.service_name, app_dir, args.app_user)
 
-    print("→ Configurando Nginx")
-    write_nginx_conf(args.service_name, app_dir, args.public_host)
+    print("→ Configurando backup diário do banco")
+    write_backup_timer(data_dir, args.service_name, args.app_user)
 
     print()
     print(f"Pronto. Verifique: systemctl status {args.service_name}")
     print(f"Logs:           journalctl -u {args.service_name} -f")
-    print(f"Acesse:         http://{args.public_host if args.public_host != '_' else '<IP-PUBLICO>'}/")
+    print(f"Backups em:     {data_dir / 'backups'} (retenção 14 dias, só local)")
+    scheme = "https" if tls_enabled else "http"
+    host = args.public_host if args.public_host != "_" else "<IP-PUBLICO>"
+    print(f"Acesse:         {scheme}://{host}/")
+    if not tls_enabled:
+        print("⚠ Rodando em HTTP — defina PUBLIC_HOST com um domínio real e rode de novo pra habilitar HTTPS.")
 
 
 if __name__ == "__main__":

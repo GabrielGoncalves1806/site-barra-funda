@@ -1,6 +1,10 @@
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlmodel import SQLModel, Field
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 # ── Notices ──────────────────────────────────────────────
@@ -14,7 +18,7 @@ class NoticeBase(SQLModel):
 
 class Notice(NoticeBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=_utcnow)
 
 
 class NoticeCreate(NoticeBase):
@@ -42,7 +46,7 @@ class SaleBase(SQLModel):
 
 class Sale(SaleBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=_utcnow)
 
 
 class SaleCreate(SaleBase):
