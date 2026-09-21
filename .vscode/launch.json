@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "FastAPI (Uvicorn)",
+      "name": "FastAPI (SQLite local)",
       "type": "debugpy",
       "request": "launch",
       "module": "uvicorn",
@@ -16,7 +16,32 @@
         "8000"
       ],
       "env": {
-        "PYTHONPATH": "${workspaceFolder}"
+        "PYTHONPATH": "${workspaceFolder}",
+        "DATABASE_URL": "sqlite:///data.db",
+        "COOKIE_SECURE": "false"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "jinja": true,
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "FastAPI (Neon - PRODUÇÃO)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "args": [
+        "main:app",
+        "--reload",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "COOKIE_SECURE": "false"
       },
       "envFile": "${workspaceFolder}/.env",
       "jinja": true,
