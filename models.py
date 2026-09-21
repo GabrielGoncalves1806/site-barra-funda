@@ -1,10 +1,34 @@
 from typing import Optional
 from datetime import datetime, timezone
+from sqlalchemy import JSON, Column
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import SQLModel, Field
 
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+# ── Condomínios ──────────────────────────────────────────
+class Condominium(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    slug: str = Field(max_length=60, unique=True)
+    name: str = Field(max_length=200)
+    password_hash: str = Field(max_length=100)
+    active: bool = Field(default=True)
+    # Configuração editável pelo admin (identidade, contatos, documentos...).
+    # JSONB no Postgres; no SQLite dos testes vira JSON comum.
+    config: dict = Field(
+        default_factory=dict,
+        sa_column=Column(JSON().with_variant(JSONB(), "postgresql"), nullable=False),
+    )
+    created_at: datetime = Field(default_factory=_utcnow)
+
+
+class Domain(SQLModel, table=True):
+    """Host pelo qual o portal de um condomínio é acessado."""
+    host: str = Field(primary_key=True, max_length=253)
+    condominium_id: int = Field(foreign_key="condominium.id", index=True)
 
 
 # ── Notices ──────────────────────────────────────────────
@@ -18,6 +42,7 @@ class NoticeBase(SQLModel):
 
 class Notice(NoticeBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    condominium_id: int = Field(foreign_key="condominium.id", index=True)
     created_at: datetime = Field(default_factory=_utcnow)
 
 
@@ -46,6 +71,7 @@ class SaleBase(SQLModel):
 
 class Sale(SaleBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    condominium_id: int = Field(foreign_key="condominium.id", index=True)
     created_at: datetime = Field(default_factory=_utcnow)
 
 
@@ -78,6 +104,7 @@ class AreaBase(SQLModel):
 
 class Area(AreaBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    condominium_id: int = Field(foreign_key="condominium.id", index=True)
 
 
 class AreaCreate(AreaBase):
@@ -107,6 +134,7 @@ class FAQBase(SQLModel):
 
 class FAQ(FAQBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    condominium_id: int = Field(foreign_key="condominium.id", index=True)
 
 
 class FAQCreate(FAQBase):

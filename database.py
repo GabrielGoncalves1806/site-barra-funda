@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from sqlalchemy import event
-from sqlmodel import SQLModel, Session, create_engine
+from sqlmodel import Session, create_engine
 
 # A URL é lida na importação, então o .env precisa estar carregado aqui —
 # senão scripts como seed.py caem no SQLite local sem avisar.
@@ -37,10 +37,6 @@ else:
     # O Neon desliga o compute depois de 5 min parado e derruba as conexões
     # abertas; pool_pre_ping testa a conexão antes de usar e reconecta.
     engine = create_engine(DATABASE_URL, echo=False, pool_pre_ping=True)
-
-
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
 
 
 def get_session():

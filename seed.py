@@ -1,18 +1,29 @@
-"""Popula o banco com dados iniciais (avisos e vendas de exemplo)."""
+"""Popula um banco novo com um condomínio de demonstração, pra dev local.
 
-from database import create_db_and_tables, engine
+Rode antes `alembic upgrade head`. Cria o condomínio "demo", acessível em
+localhost e 127.0.0.1, e pede a senha do admin no terminal.
+"""
+
 import json
-from models import Notice, Sale, Area, FAQ
+
 from sqlmodel import Session, select
+
+import manage
+from database import engine
+from models import Condominium, Notice, Sale, Area, FAQ
+
+DEMO_HOSTS = ["localhost", "127.0.0.1"]
 
 
 def seed():
-    create_db_and_tables()
-
     with Session(engine) as session:
-        if session.exec(select(Notice)).first():
-            print("Banco já possui dados. Seed ignorado.")
+        if session.exec(select(Condominium)).first():
+            print("Banco já possui condomínios. Seed ignorado.")
             return
+
+        condominium = manage.create_condominium(session, "demo", "Condomínio Demo", manage.ask_password())
+        for host in DEMO_HOSTS:
+            manage.add_domain(session, condominium.slug, host)
 
         notices = [
             Notice(
@@ -158,7 +169,10 @@ def seed():
             FAQ(question="Visitantes podem usar áreas comuns?", answer="As áreas de lazer são exclusivas dos moradores. Visitantes só podem acessar espaços reservados que estejam vinculados a uma unidade e identificados na lista de convidados.", icon="👥", anchor_id="faq-visitantes", display_order=12),
         ]
 
-        session.add_all(notices + sales + areas + faqs)
+        items = notices + sales + areas + faqs
+        for item in items:
+            item.condominium_id = condominium.id
+        session.add_all(items)
         session.commit()
         print(f"Seed concluído: {len(notices)} avisos, {len(sales)} vendas, {len(areas)} áreas e {len(faqs)} FAQs inseridos.")
 

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from pathlib import Path
-import os
 import uuid
 
 import bcrypt
@@ -10,8 +9,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Depends, HTTPException, UploadFile, File, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlmodel import Session, select
 
 load_dotenv()
@@ -28,11 +26,13 @@ from auth import (
     clear_session_cookie,
     require_admin,
 )
-from database import create_db_and_tables, get_session
+from database import get_session
 from logging_config import setup_logging, audit
+from tenancy import CondominiumNotFound, get_current_condominium, get_owned
 
 setup_logging()
 from models import (
+    Condominium,
     Notice, NoticeCreate, NoticeUpdate,
     Sale, SaleCreate, SaleUpdate,
     Area, AreaCreate, AreaUpdate,
@@ -52,7 +52,8 @@ def ensure_upload_dir():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    create_db_and_tables()
+    # O schema do banco é responsabilidade do Alembic (`alembic upgrade head`),
+    # não do startup do app.
     ensure_upload_dir()
     yield
 
@@ -67,20 +68,7 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
-# CORS restrito aos domínios configurados em .env (separados por vírgula).
-_origins_env = os.getenv("ALLOWED_ORIGINS", "").strip()
-_allowed_origins = [o.strip() for o in _origins_env.split(",") if o.strip()] or [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=_allowed_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allow_headers=["Content-Type", "Authorization"],
-)
+# Sem CORS: site e API de cada condomínio sempre ficam no mesmo domínio.
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -99,26 +87,34 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 
+@app.exception_handler(CondominiumNotFound)
+async def condominium_not_found(request: Request, exc: CondominiumNotFound):
+    if request.url.path.startswith("/api/"):
+        return JSONResponse({"detail": "Portal não encontrado"}, status_code=404)
+    return templates.TemplateResponse(request, "not_found.html", status_code=404)
+
+
 # ── Páginas ──────────────────────────────────────────────
 @app.get("/", response_class=HTMLResponse)
-async def page_home(request: Request):
-    return templates.TemplateResponse(request, "index.html")
+async def page_home(request: Request, condominium: Condominium = Depends(get_current_condominium)):
+    return templates.TemplateResponse(request, "index.html", {"condominium": condominium})
 
 
 @app.get("/admin", response_class=HTMLResponse)
-async def page_admin(request: Request):
-    return templates.TemplateResponse(request, "admin.html")
+async def page_admin(request: Request, condominium: Condominium = Depends(get_current_condominium)):
+    return templates.TemplateResponse(request, "admin.html", {"condominium": condominium})
 
 
 # ── API: Avisos ──────────────────────────────────────────
 @app.get("/api/notices")
-def list_notices(session: Session = Depends(get_session)):
-    return session.exec(select(Notice).order_by(Notice.id.desc())).all()
+def list_notices(session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium)):
+    query = select(Notice).where(Notice.condominium_id == condominium.id).order_by(Notice.id.desc())
+    return session.exec(query).all()
 
 
 @app.post("/api/notices", status_code=201)
-def create_notice(data: NoticeCreate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
-    notice = Notice(**data.model_dump())
+def create_notice(data: NoticeCreate, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+    notice = Notice(**data.model_dump(), condominium_id=condominium.id)
     session.add(notice)
     session.commit()
     session.refresh(notice)
@@ -126,10 +122,8 @@ def create_notice(data: NoticeCreate, session: Session = Depends(get_session), _
 
 
 @app.put("/api/notices/{notice_id}")
-def update_notice(notice_id: int, data: NoticeUpdate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
-    notice = session.get(Notice, notice_id)
-    if not notice:
-        raise HTTPException(404, "Aviso não encontrado")
+def update_notice(notice_id: int, data: NoticeUpdate, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+    notice = get_owned(session, Notice, notice_id, condominium, "Aviso não encontrado")
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(notice, key, value)
     session.add(notice)
@@ -139,10 +133,8 @@ def update_notice(notice_id: int, data: NoticeUpdate, session: Session = Depends
 
 
 @app.delete("/api/notices/{notice_id}")
-def delete_notice(notice_id: int, session: Session = Depends(get_session), _: str = Depends(require_admin)):
-    notice = session.get(Notice, notice_id)
-    if not notice:
-        raise HTTPException(404, "Aviso não encontrado")
+def delete_notice(notice_id: int, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+    notice = get_owned(session, Notice, notice_id, condominium, "Aviso não encontrado")
     session.delete(notice)
     session.commit()
     return {"ok": True}
@@ -150,13 +142,14 @@ def delete_notice(notice_id: int, session: Session = Depends(get_session), _: st
 
 # ── API: Vendas ──────────────────────────────────────────
 @app.get("/api/sales")
-def list_sales(session: Session = Depends(get_session)):
-    return session.exec(select(Sale).order_by(Sale.id.desc())).all()
+def list_sales(session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium)):
+    query = select(Sale).where(Sale.condominium_id == condominium.id).order_by(Sale.id.desc())
+    return session.exec(query).all()
 
 
 @app.post("/api/sales", status_code=201)
-def create_sale(data: SaleCreate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
-    sale = Sale(**data.model_dump())
+def create_sale(data: SaleCreate, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+    sale = Sale(**data.model_dump(), condominium_id=condominium.id)
     session.add(sale)
     session.commit()
     session.refresh(sale)
@@ -164,10 +157,8 @@ def create_sale(data: SaleCreate, session: Session = Depends(get_session), _: st
 
 
 @app.put("/api/sales/{sale_id}")
-def update_sale(sale_id: int, data: SaleUpdate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
-    sale = session.get(Sale, sale_id)
-    if not sale:
-        raise HTTPException(404, "Produto não encontrado")
+def update_sale(sale_id: int, data: SaleUpdate, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+    sale = get_owned(session, Sale, sale_id, condominium, "Produto não encontrado")
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(sale, key, value)
     session.add(sale)
@@ -177,10 +168,8 @@ def update_sale(sale_id: int, data: SaleUpdate, session: Session = Depends(get_s
 
 
 @app.patch("/api/sales/{sale_id}/toggle")
-def toggle_sale(sale_id: int, session: Session = Depends(get_session), _: str = Depends(require_admin)):
-    sale = session.get(Sale, sale_id)
-    if not sale:
-        raise HTTPException(404, "Produto não encontrado")
+def toggle_sale(sale_id: int, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+    sale = get_owned(session, Sale, sale_id, condominium, "Produto não encontrado")
     sale.active = not sale.active
     session.add(sale)
     session.commit()
@@ -189,10 +178,8 @@ def toggle_sale(sale_id: int, session: Session = Depends(get_session), _: str = 
 
 
 @app.delete("/api/sales/{sale_id}")
-def delete_sale(sale_id: int, session: Session = Depends(get_session), _: str = Depends(require_admin)):
-    sale = session.get(Sale, sale_id)
-    if not sale:
-        raise HTTPException(404, "Produto não encontrado")
+def delete_sale(sale_id: int, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+    sale = get_owned(session, Sale, sale_id, condominium, "Produto não encontrado")
     remove_uploaded_file(sale.image)
     session.delete(sale)
     session.commit()
@@ -201,13 +188,14 @@ def delete_sale(sale_id: int, session: Session = Depends(get_session), _: str = 
 
 # ── API: Áreas Comuns ────────────────────────────────────
 @app.get("/api/areas")
-def list_areas(session: Session = Depends(get_session)):
-    return session.exec(select(Area).order_by(Area.display_order)).all()
+def list_areas(session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium)):
+    query = select(Area).where(Area.condominium_id == condominium.id).order_by(Area.display_order)
+    return session.exec(query).all()
 
 
 @app.post("/api/areas", status_code=201)
-def create_area(data: AreaCreate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
-    area = Area(**data.model_dump())
+def create_area(data: AreaCreate, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+    area = Area(**data.model_dump(), condominium_id=condominium.id)
     session.add(area)
     session.commit()
     session.refresh(area)
@@ -215,10 +203,8 @@ def create_area(data: AreaCreate, session: Session = Depends(get_session), _: st
 
 
 @app.put("/api/areas/{area_id}")
-def update_area(area_id: int, data: AreaUpdate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
-    area = session.get(Area, area_id)
-    if not area:
-        raise HTTPException(404, "Área não encontrada")
+def update_area(area_id: int, data: AreaUpdate, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+    area = get_owned(session, Area, area_id, condominium, "Área não encontrada")
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(area, key, value)
     session.add(area)
@@ -228,10 +214,8 @@ def update_area(area_id: int, data: AreaUpdate, session: Session = Depends(get_s
 
 
 @app.delete("/api/areas/{area_id}")
-def delete_area(area_id: int, session: Session = Depends(get_session), _: str = Depends(require_admin)):
-    area = session.get(Area, area_id)
-    if not area:
-        raise HTTPException(404, "Área não encontrada")
+def delete_area(area_id: int, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+    area = get_owned(session, Area, area_id, condominium, "Área não encontrada")
     remove_uploaded_file(area.image)
     session.delete(area)
     session.commit()
@@ -240,13 +224,14 @@ def delete_area(area_id: int, session: Session = Depends(get_session), _: str = 
 
 # ── API: FAQs ────────────────────────────────────────────
 @app.get("/api/faqs")
-def list_faqs(session: Session = Depends(get_session)):
-    return session.exec(select(FAQ).order_by(FAQ.display_order)).all()
+def list_faqs(session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium)):
+    query = select(FAQ).where(FAQ.condominium_id == condominium.id).order_by(FAQ.display_order)
+    return session.exec(query).all()
 
 
 @app.post("/api/faqs", status_code=201)
-def create_faq(data: FAQCreate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
-    faq = FAQ(**data.model_dump())
+def create_faq(data: FAQCreate, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+    faq = FAQ(**data.model_dump(), condominium_id=condominium.id)
     session.add(faq)
     session.commit()
     session.refresh(faq)
@@ -254,10 +239,8 @@ def create_faq(data: FAQCreate, session: Session = Depends(get_session), _: str 
 
 
 @app.put("/api/faqs/{faq_id}")
-def update_faq(faq_id: int, data: FAQUpdate, session: Session = Depends(get_session), _: str = Depends(require_admin)):
-    faq = session.get(FAQ, faq_id)
-    if not faq:
-        raise HTTPException(404, "FAQ não encontrada")
+def update_faq(faq_id: int, data: FAQUpdate, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+    faq = get_owned(session, FAQ, faq_id, condominium, "FAQ não encontrada")
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(faq, key, value)
     session.add(faq)
@@ -267,10 +250,8 @@ def update_faq(faq_id: int, data: FAQUpdate, session: Session = Depends(get_sess
 
 
 @app.delete("/api/faqs/{faq_id}")
-def delete_faq(faq_id: int, session: Session = Depends(get_session), _: str = Depends(require_admin)):
-    faq = session.get(FAQ, faq_id)
-    if not faq:
-        raise HTTPException(404, "FAQ não encontrada")
+def delete_faq(faq_id: int, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+    faq = get_owned(session, FAQ, faq_id, condominium, "FAQ não encontrada")
     session.delete(faq)
     session.commit()
     return {"ok": True}
@@ -332,34 +313,25 @@ async def upload_file(file: UploadFile = File(...), _: str = Depends(require_adm
 
 
 # ── Auth (login + JWT em cookie httpOnly) ────────────────
-ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH", "")
-
-if not ADMIN_PASSWORD_HASH:
-    raise RuntimeError(
-        "ADMIN_PASSWORD_HASH não configurado. Crie um .env baseado no .env.example "
-        "e gere o hash com scripts/generate_password_hash.py."
-    )
-
-
 @app.post("/api/auth")
 @limiter.limit("5/minute")
-def auth_check(request: Request, request_body: dict, response: Response):
+def auth_check(request: Request, request_body: dict, response: Response, condominium: Condominium = Depends(get_current_condominium)):
     client_ip = request.client.host if request.client else "unknown"
     password = request_body.get("password", "")
     if not isinstance(password, str):
-        audit("login_failed", ip=client_ip, reason="invalid_payload")
+        audit("login_failed", ip=client_ip, condominium=condominium.slug, reason="invalid_payload")
         raise HTTPException(401, "Senha incorreta")
     try:
-        ok = bcrypt.checkpw(password.encode("utf-8"), ADMIN_PASSWORD_HASH.encode("utf-8"))
+        ok = bcrypt.checkpw(password.encode("utf-8"), condominium.password_hash.encode("utf-8"))
     except (ValueError, TypeError):
         ok = False
     if not ok:
-        audit("login_failed", ip=client_ip)
+        audit("login_failed", ip=client_ip, condominium=condominium.slug)
         raise HTTPException(401, "Senha incorreta")
 
-    token = create_access_token(subject="admin")
+    token = create_access_token(condominium.id)
     set_session_cookie(response, token)
-    audit("login_success", ip=client_ip)
+    audit("login_success", ip=client_ip, condominium=condominium.slug)
     return {"ok": True}
 
 

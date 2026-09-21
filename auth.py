@@ -6,7 +6,10 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import jwt
-from fastapi import Cookie, HTTPException, Response
+from fastapi import Cookie, Depends, HTTPException, Response
+
+from models import Condominium
+from tenancy import get_current_condominium
 
 
 COOKIE_NAME = "admin_session"
@@ -36,11 +39,12 @@ def _cookie_secure() -> bool:
     return value.strip().lower() == "true"
 
 
-def create_access_token(subject: str = "admin") -> str:
-    """Gera um JWT assinado válido por TOKEN_TTL_HOURS."""
+def create_access_token(condominium_id: int, subject: str = "admin") -> str:
+    """Gera um JWT assinado válido por TOKEN_TTL_HOURS, preso a um condomínio."""
     now = datetime.now(tz=timezone.utc)
     payload = {
         "sub": subject,
+        "cid": condominium_id,
         "iat": int(now.timestamp()),
         "exp": int((now + timedelta(hours=TOKEN_TTL_HOURS)).timestamp()),
     }
@@ -64,8 +68,11 @@ def clear_session_cookie(response: Response) -> None:
     response.delete_cookie(COOKIE_NAME, path="/")
 
 
-def require_admin(admin_session: Optional[str] = Cookie(default=None)) -> str:
-    """Dependency: valida o cookie JWT. Retorna o subject ou 401."""
+def require_admin(
+    condominium: Condominium = Depends(get_current_condominium),
+    admin_session: Optional[str] = Cookie(default=None),
+) -> str:
+    """Dependency: valida o cookie JWT do condomínio do Host. Retorna o subject ou 401."""
     if not admin_session:
         raise HTTPException(status_code=401, detail="Não autenticado")
     try:
@@ -77,4 +84,7 @@ def require_admin(admin_session: Optional[str] = Cookie(default=None)) -> str:
     sub = payload.get("sub")
     if not sub:
         raise HTTPException(status_code=401, detail="Token sem subject")
+    # Token de outro condomínio (cookie copiado de um domínio pro outro)
+    if payload.get("cid") != condominium.id:
+        raise HTTPException(status_code=401, detail="Sessão inválida para este condomínio")
     return sub
