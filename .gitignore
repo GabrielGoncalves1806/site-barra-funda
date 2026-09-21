@@ -136,6 +136,8 @@ celerybeat.pid
 
 # Local database / runtime data
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
 *.sqlite3
 static/uploads/
