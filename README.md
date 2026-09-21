@@ -5,7 +5,7 @@ Portal web para moradores do condomínio com painel administrativo para o síndi
 ## Tecnologias
 
 - **Backend:** FastAPI + Uvicorn
-- **Banco:** SQLite (via SQLModel)
+- **Banco:** Postgres no Neon em produção, SQLite em dev/testes (via SQLModel)
 - **Templates:** Jinja2
 - **Frontend:** HTML/CSS/JS (vanilla)
 - **Auth:** JWT em cookie httpOnly, senha hasheada com bcrypt
@@ -128,15 +128,29 @@ ADMIN_PASSWORD_HASH=<hash gerado pelo script>
 SECRET_KEY=<token aleatório>
 ALLOWED_ORIGINS=https://seu-app.onrender.com
 COOKIE_SECURE=true
+DATABASE_URL=<connection string pooled do Neon>
 ```
 
 > `COOKIE_SECURE=true` é **obrigatório em produção** (cookie só transita via HTTPS).
 > Sem `ADMIN_PASSWORD_HASH`, `SECRET_KEY` ou `COOKIE_SECURE`, a aplicação não sobe —
 > as três são exigidas explicitamente, sem default silencioso.
+>
+> Sem `DATABASE_URL` a aplicação sobe com um SQLite **vazio** dentro do container
+> (o `data.db` não vai pro git) e perde tudo a cada restart.
 
-### Banco persistente
+### Banco (Neon)
 
-Atualmente o `data.db` é embarcado na imagem Docker — qualquer alteração feita pelo admin via deploy é **perdida** quando o container reinicia. Para persistência real, mover para um Render Disk ou Postgres, ou migrar pra VPS (ver abaixo).
+Produção usa Postgres no [Neon](https://neon.com), de preferência na região de São Paulo (`sa-east-1`). Pra levar os dados do `data.db` local pro Neon (uma vez só):
+
+```bash
+# com DATABASE_URL do Neon no .env
+python scripts/migrate_sqlite_to_postgres.py
+```
+
+O script roda numa transação só, ajusta as sequences dos ids e se recusa a rodar se o destino já tiver dados.
+
+> As imagens enviadas pelo admin (`static/uploads/`) ainda ficam no disco do container
+> e somem num restart — isso é a próxima etapa (storage de objetos).
 
 ## Deploy em VPS
 

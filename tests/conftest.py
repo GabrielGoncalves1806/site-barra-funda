@@ -11,6 +11,8 @@ os.environ["ADMIN_PASSWORD_HASH"] = bcrypt.hashpw(
 os.environ["SECRET_KEY"] = "test-secret-key-only-for-tests-not-secure"
 os.environ["ALLOWED_ORIGINS"] = "http://testserver"
 os.environ["COOKIE_SECURE"] = "false"
+# Sem isso, o DATABASE_URL do .env (Neon) seria usado no startup do app
+os.environ["DATABASE_URL"] = "sqlite://"
 
 import pytest
 from fastapi.testclient import TestClient
