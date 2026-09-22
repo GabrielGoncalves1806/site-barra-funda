@@ -1,4 +1,6 @@
 """Páginas renderizadas a partir do config do condomínio."""
+from html.parser import HTMLParser
+
 from sqlmodel import select
 
 from models import Condominium
@@ -74,3 +76,34 @@ def test_area_tem_icone_com_default(auth_client):
     assert area["icon"] == "🏢"
     area = auth_client.post("/api/areas", json={"title": "Pet", "slug": "pet", "icon": "🐾"}).json()
     assert area["icon"] == "🐾"
+
+
+class _FooterPlacement(HTMLParser):
+    """Conta rodapés fora de uma aba. Fecha tags como o navegador: um </div>
+    sem <div> aberto é ignorado."""
+    VOID = {"br", "img", "input", "meta", "link", "hr"}
+
+    def __init__(self):
+        super().__init__()
+        self.stack: list[tuple[str, str]] = []
+        self.outside_tabs = 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "footer" and not any("tab-content" in classes for _, classes in self.stack):
+            self.outside_tabs += 1
+        if tag not in self.VOID:
+            self.stack.append((tag, dict(attrs).get("class") or ""))
+
+    def handle_endtag(self, tag):
+        for i in range(len(self.stack) - 1, -1, -1):
+            if self.stack[i][0] == tag:
+                del self.stack[i:]
+                break
+
+
+def test_todo_rodape_fica_dentro_de_uma_aba(client, session):
+    # Rodapé fora de aba aparece no topo de todas as outras abas.
+    _set_config(session, "condo-a", CONFIG)
+    parser = _FooterPlacement()
+    parser.feed(client.get("/").text)
+    assert parser.outside_tabs == 0
