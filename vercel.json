@@ -1,9 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["cle1"],
-  "functions": {
-    "main.py": {
-      "excludeFiles": "{tests/**,docs/**,migrations/**,scripts/**,assets/**,seed.py,manage.py,alembic.ini}"
-    }
-  }
+  "regions": ["cle1"]
 }

@@ -112,8 +112,7 @@ site-barra-funda/
 ├── logging_config.py       # Setup de logging + audit log
 ├── seed.py                 # Condomínio de demonstração pra dev
 ├── alembic.ini
-├── vercel.json             # Região da function + arquivos fora do bundle
-├── pyproject.toml          # Só config da Vercel (estáticos na CDN)
+├── vercel.json             # Região da function (cle1, junto do Neon)
 ├── migrations/             # Alembic (env.py + versions/)
 ├── scripts/
 │   └── deploy_vps.py       # ⚠️ desatualizado (ver abaixo)
@@ -162,7 +161,11 @@ Registro de outro condomínio responde 404, igual a inexistente.
 
 ## Deploy na Vercel
 
-A Vercel detecta o FastAPI pelo `main.py`. Env vars no projeto (**Settings → Environment Variables**):
+A Vercel detecta o FastAPI pelo `main.py` e instala as dependências do `requirements.txt`.
+
+> ⚠️ Não crie um `pyproject.toml`: se ele existir, a Vercel instala as dependências por ele e ignora o `requirements.txt`.
+
+Env vars no projeto (**Settings → Environment Variables**):
 
 ```
 SECRET_KEY=<token aleatório>
