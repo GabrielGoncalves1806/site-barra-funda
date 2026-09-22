@@ -52,6 +52,14 @@ Sidebar em grupos — **Dia a dia** (avisos, vendas), **Conteúdo** (áreas, FAQ
 - Fotos são reduzidas no navegador (até 1600 px, JPEG) antes do upload; PDF sobe direto até 4 MB (maior que isso: link do Drive).
 - A tela aberta fica no `#hash` da URL, então recarregar não perde o lugar.
 
+## Estáticos e cache
+
+Os templates apontam CSS e JS pra `/static/v/<versão>/...` via `static_url('css/styles.css')`. A versão é um hash do conteúdo de `static/` (sem `uploads/`): mudou qualquer arquivo, muda a URL. Por isso a resposta vai com cache de um ano (`s-maxage` pra CDN da Vercel, `immutable` pro navegador). Os `import "./core.js"` do admin herdam a versão sozinhos.
+
+- Versão que não bate com a atual (aba aberta antes do deploy) recebe o arquivo atual com `no-cache`.
+- O hash é recalculado a cada uso (~0,5 ms), então no dev basta salvar o arquivo e dar F5.
+- `/static/...` sem versão continua existindo pro placeholder de venda e pros uploads locais.
+
 ## Setup local
 
 ### 1. Ambiente virtual + dependências
@@ -139,6 +147,7 @@ site-barra-funda/
 ├── models.py               # Condominium, Domain, Notice, Sale, Area, FAQ
 ├── manage.py               # CLI de super-admin
 ├── storage.py              # Uploads: disco local ou Vercel Blob, separados por condomínio
+├── static_assets.py        # URLs versionadas dos estáticos + cache de um ano
 ├── condo_config.py         # Schema e validação do config de cada condomínio
 ├── logging_config.py       # Setup de logging + audit log
 ├── seed.py                 # Condomínio de demonstração pra dev
