@@ -1,0 +1,526 @@
+/* Painel do síndico. Usa as variáveis e o fundo do styles.css do portal. */
+
+[hidden],
+.hidden {
+  display: none !important;
+}
+
+/* ── Layout ─────────────────────────────────────────────── */
+.admin-shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px 16px;
+  background: rgba(10, 12, 40, .35);
+  border-right: 1px solid rgba(255, 255, 255, .1);
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px;
+  font-size: 16px;
+}
+
+.sidebar__logo {
+  font-size: 26px;
+}
+
+.sidebar__portal {
+  margin: 8px 8px 12px;
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.sidebar__portal:hover {
+  color: white;
+}
+
+.sidebar__group {
+  margin: 16px 8px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: .7;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.sidebar__link:hover {
+  background: rgba(255, 255, 255, .08);
+  color: white;
+}
+
+.sidebar__link.active {
+  background: var(--accent);
+  color: white;
+}
+
+.sidebar__icon {
+  width: 22px;
+  text-align: center;
+}
+
+.sidebar__logout {
+  margin-top: auto;
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+.admin-main {
+  width: 100%;
+  max-width: 920px;
+  padding: 32px 32px 64px;
+}
+
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.admin-topbar h1 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.menu-toggle {
+  display: none;
+}
+
+/* ── Cards e formulários ───────────────────────────────── */
+.admin-card {
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.admin-card h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.card-description {
+  margin: -8px 0 16px;
+  font-size: 14px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  min-width: 0;
+}
+
+.form-group--full {
+  grid-column: 1 / -1;
+}
+
+.form-group > label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, .15);
+  background: rgba(255, 255, 255, .08);
+  color: white;
+  border-radius: 10px;
+  font-size: 16px; /* 16px evita o zoom automático do iOS */
+  font-family: inherit;
+}
+
+.form-group select option {
+  color: #1a1b3a;
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-group input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  accent-color: var(--accent);
+}
+
+.form-group input[type="color"] {
+  width: 96px;
+  height: 46px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.form-group input.input--emoji {
+  width: 96px;
+  font-size: 22px;
+  text-align: center;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.help {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* ── Botões ────────────────────────────────────────────── */
+.btn-admin {
+  min-height: 44px;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.btn-admin--primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+}
+
+.btn-admin--ghost {
+  background: rgba(255, 255, 255, .1);
+  color: var(--muted);
+  border: 1px solid rgba(255, 255, 255, .15);
+}
+
+.btn-admin--ghost:hover {
+  color: white;
+}
+
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 255, 255, .1);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all .2s ease;
+}
+
+.btn-icon:hover:not(:disabled) {
+  background: rgba(255, 255, 255, .2);
+  color: white;
+}
+
+.btn-icon:disabled {
+  opacity: .35;
+  cursor: default;
+}
+
+.btn-icon--danger:hover:not(:disabled) {
+  background: rgba(255, 71, 87, .3);
+  color: #ff4757;
+}
+
+/* ── Listas de itens (avisos, vendas...) ───────────────── */
+.item-list {
+  display: grid;
+  gap: 12px;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 12px;
+}
+
+.item-row__thumb {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  object-fit: cover;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .08);
+}
+
+.item-row__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-row__title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+
+.item-row__meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.item-row__actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ── Lista repetível (contatos, documentos, passos...) ─── */
+.repeat__list {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.repeat__item {
+  padding: 16px;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 12px;
+}
+
+.repeat__item .repeat__item {
+  background: rgba(255, 255, 255, .04);
+}
+
+.repeat__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.repeat__title {
+  overflow-wrap: anywhere;
+}
+
+.repeat__actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ── Campos de arquivo ─────────────────────────────────── */
+.image-field__preview {
+  display: block;
+  max-width: 100%;
+  max-height: 160px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.image-field__actions,
+.document-field {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.document-field input {
+  flex: 1 1 240px;
+}
+
+/* ── Login ─────────────────────────────────────────────── */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(8, 15, 40, .95);
+  z-index: 1000;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 400px;
+  padding: 40px;
+  text-align: center;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 24px;
+}
+
+.login-box__logo {
+  font-size: 40px;
+}
+
+.login-box h2 {
+  margin: 8px 0;
+}
+
+.login-box p {
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+
+.login-box__submit {
+  width: 100%;
+}
+
+.login-error {
+  color: #ff6b7a;
+  font-size: 14px;
+  margin: 12px 0 0 !important;
+}
+
+/* ── Toast ─────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  max-width: calc(100vw - 48px);
+  padding: 16px 24px;
+  background: var(--success);
+  color: white;
+  border-radius: 12px;
+  font-weight: 500;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .3);
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all .3s ease;
+  z-index: 1001;
+}
+
+.toast--error {
+  background: #e0394a;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ── Celular: a sidebar vira gaveta ────────────────────── */
+@media (max-width: 900px) {
+  .admin-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(300px, 85vw);
+    z-index: 20;
+    background: #1f2150;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+  }
+
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop.is-open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    background: rgba(0, 0, 0, .5);
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .admin-main {
+    padding: 20px 16px 48px;
+  }
+
+  .admin-topbar h1 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-card {
+    padding: 16px;
+  }
+
+  .item-row {
+    flex-wrap: wrap;
+  }
+
+  .item-row__info {
+    flex-basis: calc(100% - 70px);
+  }
+
+  .item-row__actions {
+    margin-left: auto;
+  }
+
+  .toast {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    max-width: none;
+  }
+}
