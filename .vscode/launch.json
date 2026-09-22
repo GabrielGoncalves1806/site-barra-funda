@@ -18,7 +18,8 @@
       "env": {
         "PYTHONPATH": "${workspaceFolder}",
         "DATABASE_URL": "sqlite:///data.db",
-        "COOKIE_SECURE": "false"
+        "COOKIE_SECURE": "false",
+        "BLOB_READ_WRITE_TOKEN": ""
       },
       "envFile": "${workspaceFolder}/.env",
       "jinja": true,

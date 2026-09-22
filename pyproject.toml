@@ -1,0 +1,7 @@
+# Só configuração da Vercel: as dependências continuam no requirements.txt.
+
+[tool.vercel.fastapi.static]
+# Com middleware global (headers de segurança), a Vercel manteria /static dentro
+# da function. Isso força os arquivos pra CDN — eles saem sem os headers do
+# middleware, o que não importa pra CSS, JS, imagem e PDF.
+cdn = true
