@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex" />
   <title>Administração • {{ display_name }}</title>
-  <link rel="stylesheet" href="/static/css/styles.css" />
-  <link rel="stylesheet" href="/static/admin/admin.css" />
+  <link rel="stylesheet" href="{{ static_url('css/styles.css') }}" />
+  <link rel="stylesheet" href="{{ static_url('admin/admin.css') }}" />
   <style>
     :root {
       --accent: {{ config.identity.accent }};
@@ -58,7 +58,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script type="module" src="/static/admin/app.js"></script>
+  <script type="module" src="{{ static_url('admin/app.js') }}"></script>
 </body>
 
 </html>

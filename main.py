@@ -27,6 +27,7 @@ from auth import (
 )
 from database import get_session
 from logging_config import setup_logging, audit
+from static_assets import VersionedStaticFiles, static_url
 from storage import get_storage
 from tenancy import CondominiumNotFound, get_current_condominium, get_owned
 
@@ -65,6 +66,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(SecurityHeadersMiddleware)
 
+# O versionado vem antes: senão o mount do /static captura /static/v/... e dá 404.
+app.mount("/static/v/{version}", VersionedStaticFiles(directory=str(STATIC_DIR)), name="static_versioned")
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.filters.update(
@@ -73,6 +76,7 @@ templates.env.filters.update(
     hex_to_rgb=condo_config.hex_to_rgb,
 )
 templates.env.globals["maps_url"] = condo_config.maps_url
+templates.env.globals["static_url"] = static_url
 
 
 @app.exception_handler(CondominiumNotFound)

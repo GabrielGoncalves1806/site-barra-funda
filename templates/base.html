@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Condomínio {{ display_name }} • {{ config.identity.subtitle }}</title>
   <meta name="description" content="Informações, avisos, documentos e áreas comuns do condomínio." />
-  <link rel="stylesheet" href="/static/css/styles.css" />
+  <link rel="stylesheet" href="{{ static_url('css/styles.css') }}" />
   <style>
     :root {
       --accent: {{ config.identity.accent }};
@@ -54,7 +54,7 @@
     {% block content %}{% endblock %}
   </main>
 
-  <script src="/static/js/app.js"></script>
+  <script src="{{ static_url('js/app.js') }}"></script>
 </body>
 
 </html>
