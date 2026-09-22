@@ -61,6 +61,13 @@ emergência (190/192/193) seguem fixos no template.
 - "Trocar senha" pro próprio síndico.
 - JS puro em módulos nativos, sem build: `static/admin/{admin.css,app.js,fields.js,resources.js,sections.js}`.
 
+### Ajustes feitos na implementação da F4 (2026-09-22)
+
+- Um módulo a mais, `core.js` (DOM, API, toast, upload), pra os outros não se importarem em círculo.
+- Área: o slug sai do formulário — nasce do nome na criação e não muda ao editar. FAQ: o campo "âncora" sumiu.
+- `POST /api/password` pra troca de senha; `/api/upload` aceita PDF (confere a assinatura `%PDF`).
+- O texto da aba Áreas (intro + aviso em destaque) fica na tela de Áreas, junto da lista.
+
 ## Portal do morador (F3)
 
 - A rota da página resolve o condomínio e passa `condominium` e `config` pro

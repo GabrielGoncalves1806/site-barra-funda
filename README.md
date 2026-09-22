@@ -43,6 +43,15 @@ Todo campo tem valor padrão: condomínio novo já abre com estados vazios, e um
 
 As áreas comuns continuam em tabela (`/api/areas`), com um `icon` que aparece na grade da Início.
 
+## Painel do síndico (`/admin`)
+
+Sidebar em grupos — **Dia a dia** (avisos, vendas), **Conteúdo** (áreas, FAQs, documentos, contatos, serviços próximos, novo morador), **Aparência** (identidade, página inicial) e **Configurações** (abas visíveis, trocar senha). No celular a sidebar vira menu.
+
+- JS puro em módulos nativos, sem build (`static/admin/`): `core.js` (DOM, API, toast, upload), `fields.js` (campos a partir de uma definição, incluindo a lista repetível com ↑↓), `resources.js` (CRUD de avisos, vendas, áreas e FAQs), `sections.js` (seções do config) e `app.js` (login e navegação).
+- Cada seção de config salva só a si mesma.
+- Fotos são reduzidas no navegador (até 1600 px, JPEG) antes do upload; PDF sobe direto até 4 MB (maior que isso: link do Drive).
+- A tela aberta fica no `#hash` da URL, então recarregar não perde o lugar.
+
 ## Setup local
 
 ### 1. Ambiente virtual + dependências
@@ -137,6 +146,7 @@ site-barra-funda/
 ├── vercel.json             # Região da function (cle1, junto do Neon)
 ├── migrations/             # Alembic (env.py + versions/)
 ├── tests/                  # pytest
+├── static/admin/           # Painel do síndico (módulos JS + admin.css)
 ├── templates/
 │   ├── base.html
 │   ├── index.html
@@ -176,7 +186,8 @@ Todas as rotas respondem no contexto do condomínio do domínio acessado.
 | POST/PUT/PATCH/DELETE | `/api/sales[/{id}]` | CRUD vendas |
 | POST/PUT/DELETE | `/api/areas[/{id}]` | CRUD áreas |
 | POST/PUT/DELETE | `/api/faqs[/{id}]` | CRUD FAQs |
-| POST | `/api/upload` | Upload de imagem (4MB máx, jpg/png/webp/gif) |
+| POST | `/api/upload` | Upload de imagem (jpg/png/webp/gif) ou PDF, até 4MB |
+| POST | `/api/password` | Troca a senha do admin (exige a senha atual) |
 | PUT | `/api/config/{seção}` | Salva uma seção do config (as outras não mudam) |
 
 Registro de outro condomínio responde 404, igual a inexistente.
