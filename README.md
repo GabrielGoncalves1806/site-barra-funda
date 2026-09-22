@@ -11,7 +11,8 @@ Portal web para moradores de condomínio, com painel administrativo para o sínd
 - **Frontend:** HTML/CSS/JS (vanilla)
 - **Auth:** JWT em cookie httpOnly, uma senha (bcrypt) por condomínio
 - **Testes:** pytest + httpx
-- **Deploy:** Docker (Render)
+- **Arquivos enviados:** Vercel Blob em produção, disco local em dev
+- **Deploy:** Vercel (região `cle1`, junto do Neon em Ohio)
 
 ## Como funciona o multi-condomínio
 
@@ -107,9 +108,12 @@ site-barra-funda/
 ├── database.py             # Engine (SQLite ou Postgres) + sessão
 ├── models.py               # Condominium, Domain, Notice, Sale, Area, FAQ
 ├── manage.py               # CLI de super-admin
+├── storage.py              # Uploads: disco local ou Vercel Blob, separados por condomínio
 ├── logging_config.py       # Setup de logging + audit log
 ├── seed.py                 # Condomínio de demonstração pra dev
 ├── alembic.ini
+├── vercel.json             # Região da function + arquivos fora do bundle
+├── pyproject.toml          # Só config da Vercel (estáticos na CDN)
 ├── migrations/             # Alembic (env.py + versions/)
 ├── scripts/
 │   └── deploy_vps.py       # ⚠️ desatualizado (ver abaixo)
@@ -141,7 +145,7 @@ Todas as rotas respondem no contexto do condomínio do domínio acessado.
 ### Auth
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| POST | `/api/auth` | Login com a senha do condomínio (5/min por IP). Seta cookie `admin_session` |
+| POST | `/api/auth` | Login com a senha do condomínio (5 tentativas/min por IP). Seta cookie `admin_session` |
 | POST | `/api/logout` | Limpa cookie |
 | GET | `/api/me` | Retorna o subject se o cookie é válido para este condomínio |
 
@@ -152,28 +156,37 @@ Todas as rotas respondem no contexto do condomínio do domínio acessado.
 | POST/PUT/PATCH/DELETE | `/api/sales[/{id}]` | CRUD vendas |
 | POST/PUT/DELETE | `/api/areas[/{id}]` | CRUD áreas |
 | POST/PUT/DELETE | `/api/faqs[/{id}]` | CRUD FAQs |
-| POST | `/api/upload` | Upload de imagem (5MB máx, jpg/png/webp/gif) |
+| POST | `/api/upload` | Upload de imagem (4MB máx, jpg/png/webp/gif) |
 
 Registro de outro condomínio responde 404, igual a inexistente.
 
-## Deploy no Render
+## Deploy na Vercel
 
-O deploy usa o `Dockerfile`. Configure as env vars no painel **Settings → Environment**:
+A Vercel detecta o FastAPI pelo `main.py`. Env vars no projeto (**Settings → Environment Variables**):
 
 ```
 SECRET_KEY=<token aleatório>
 COOKIE_SECURE=true
 DATABASE_URL=<connection string pooled do Neon>
+BLOB_READ_WRITE_TOKEN=<criado ao conectar o Blob store ao projeto>
 ```
 
 > `COOKIE_SECURE=true` é **obrigatório em produção** (cookie só transita via HTTPS).
-> Sem `SECRET_KEY` ou `COOKIE_SECURE` o login falha; sem `DATABASE_URL` a aplicação
-> usa um SQLite vazio dentro do container e perde tudo a cada restart.
+> Sem `SECRET_KEY` ou `COOKIE_SECURE` o login falha. Sem `BLOB_READ_WRITE_TOKEN`
+> os uploads iriam pro disco da function, que não persiste.
 
-Cadastre o host do Render como domínio do condomínio (`manage.py add-domain <slug> seu-app.onrender.com`), senão o portal responde 404.
+- **Preview ≠ produção:** deploys de branch (Preview) devem usar um `DATABASE_URL` de uma
+  branch do Neon, nunca o banco de produção.
+- **Blob store público:** fotos e PDFs são abertos direto pelo navegador.
+- **Uploads passam pela function**, então valem os 4,5 MB de corpo de request da Vercel
+  (o app aceita até 4 MB).
+- Cada host de acesso (`*.vercel.app`, domínio próprio) precisa estar cadastrado:
+  `manage.py add-domain <slug> <host>`.
 
-> As imagens enviadas pelo admin (`static/uploads/`) ainda ficam no disco do container
-> e somem num restart — isso é a próxima etapa (storage de objetos).
+Ordem pra subir uma versão com migração: `alembic upgrade head` apontando pro Neon de
+produção, **depois** o deploy.
+
+> O `Dockerfile` é do deploy antigo no Render e sai quando o Render for desligado.
 
 ## Deploy em VPS
 
@@ -188,10 +201,10 @@ Cadastre o host do Render como domínio do condomínio (`manage.py add-domain <s
 - ✅ Senha de admin por condomínio, hasheada com bcrypt (cost 12)
 - ✅ JWT em cookie httpOnly + SameSite=Strict, preso ao condomínio do login
 - ✅ Isolamento entre condomínios: leituras filtradas, escritas com o condomínio do domínio, 404 para registro alheio
-- ✅ Rate limit no login (5/min/IP) + rate limit global (120/min/IP) em todas as rotas
+- ✅ Rate limit no login (5 tentativas/min/IP), contado no banco pra valer entre instâncias serverless; abuso nas rotas públicas fica com o firewall da Vercel
 - ✅ Sem CORS: site e API sempre no mesmo domínio
 - ✅ Headers: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
-- ✅ Upload validado (MIME + extensão + tamanho) e proteção contra path traversal na remoção de arquivos
+- ✅ Upload validado (MIME + extensão + tamanho); arquivos separados por condomínio e remoção só dentro do prefixo do próprio condomínio
 - ✅ Validação de tamanho de inputs (Pydantic max_length)
 - ✅ Conteúdo de avisos/vendas/áreas/FAQs escapado antes de ir pro DOM (evita XSS armazenado)
 - ✅ Audit log de login/logout (com o condomínio)

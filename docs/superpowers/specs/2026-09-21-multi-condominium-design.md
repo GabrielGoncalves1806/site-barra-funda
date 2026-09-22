@@ -86,14 +86,15 @@ emergência (190/192/193) seguem fixos no template.
   `barra-funda`; a senha nova é definida via `manage.py set-password`. Conteúdo
   e arquivos saem do repo (F3); `seed.py` vira um condomínio de demonstração.
 - **Serverless** (F2): rate limit global do slowapi sai (firewall da Vercel);
-  limite de login contado no banco; audit log numa tabela.
+  limite de login contado no banco. Audit log numa tabela ficou pra depois
+  (decisão de 2026-09-21): segue só no log da Vercel.
 
 ## Fases
 
 | Fase | Entrega | Morador vê |
 |---|---|---|
 | F1 | Alembic, `Condominium`/`Domain`, resolução por Host, escopo em todas as rotas, senha por condomínio, `manage.py` | nada muda |
-| F2 | Storage no Blob, rate limit de login no banco, audit em tabela, deploy na Vercel | fim do cold start |
+| F2 | Storage no Blob, rate limit de login no banco, deploy na Vercel (`cle1`) | fim do cold start |
 | F3 | Config + templates lendo dele, busca dinâmica, repo sem dados do Barra Funda | nada muda |
 | F4 | Admin novo | síndico ganha painel novo |
 | F5 | Domínio do síndico (CNAME; MX/SPF intocados; não trocar nameservers) | endereço próprio |
