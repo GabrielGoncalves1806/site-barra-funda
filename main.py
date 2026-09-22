@@ -4,13 +4,12 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-import bcrypt
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Depends, HTTPException, UploadFile, File, Response, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
-from pydantic import ValidationError
+from pydantic import BaseModel, Field, ValidationError
 from sqlmodel import Session, delete, func, select
 
 load_dotenv()
@@ -22,7 +21,9 @@ from auth import (
     create_access_token,
     set_session_cookie,
     clear_session_cookie,
+    hash_password,
     require_admin,
+    verify_password,
 )
 from database import get_session
 from logging_config import setup_logging, audit
@@ -282,8 +283,15 @@ def delete_faq(faq_id: int, session: Session = Depends(get_session), condominium
 
 
 # ── Upload de arquivos ───────────────────────────────────
-ALLOWED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
-ALLOWED_IMAGE_MIME = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+# Extensão -> tipos aceitos. PDF é pros documentos do condomínio.
+ALLOWED_UPLOADS = {
+    ".jpg": {"image/jpeg"},
+    ".jpeg": {"image/jpeg"},
+    ".png": {"image/png"},
+    ".webp": {"image/webp"},
+    ".gif": {"image/gif"},
+    ".pdf": {"application/pdf"},
+}
 # A Vercel recusa request com corpo acima de 4,5 MB antes de chegar no app.
 MAX_UPLOAD_SIZE_BYTES = 4 * 1024 * 1024
 
@@ -296,14 +304,17 @@ async def upload_file(
     _: str = Depends(require_admin),
 ):
     extension = Path(file.filename or "").suffix.lower()
-    if extension not in ALLOWED_IMAGE_EXTS:
-        raise HTTPException(400, f"Extensão não permitida. Use: {', '.join(sorted(ALLOWED_IMAGE_EXTS))}")
-    if file.content_type not in ALLOWED_IMAGE_MIME:
-        raise HTTPException(400, "Tipo de arquivo inválido (apenas imagens).")
+    if extension not in ALLOWED_UPLOADS:
+        raise HTTPException(400, f"Extensão não permitida. Use: {', '.join(sorted(ALLOWED_UPLOADS))}")
+    if file.content_type not in ALLOWED_UPLOADS[extension]:
+        raise HTTPException(400, "Tipo de arquivo não bate com a extensão.")
 
     data = await file.read(MAX_UPLOAD_SIZE_BYTES + 1)
     if len(data) > MAX_UPLOAD_SIZE_BYTES:
         raise HTTPException(413, f"Arquivo maior que {MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)} MB.")
+    # O tipo vem do navegador; pra PDF, confere a assinatura do próprio arquivo.
+    if extension == ".pdf" and not data.startswith(b"%PDF"):
+        raise HTTPException(400, "O arquivo não é um PDF válido.")
 
     url = storage.save(data, extension, file.content_type, condominium.slug)
     return {"url": url}
@@ -350,17 +361,37 @@ def auth_check(request: Request, request_body: dict, response: Response, session
     if not isinstance(password, str):
         audit("login_failed", ip=client_ip, condominium=condominium.slug, reason="invalid_payload")
         raise HTTPException(401, "Senha incorreta")
-    try:
-        ok = bcrypt.checkpw(password.encode("utf-8"), condominium.password_hash.encode("utf-8"))
-    except (ValueError, TypeError):
-        ok = False
-    if not ok:
+    if not verify_password(password, condominium.password_hash):
         audit("login_failed", ip=client_ip, condominium=condominium.slug)
         raise HTTPException(401, "Senha incorreta")
 
     token = create_access_token(condominium.id)
     set_session_cookie(response, token)
     audit("login_success", ip=client_ip, condominium=condominium.slug)
+    return {"ok": True}
+
+
+class PasswordChange(BaseModel):
+    current_password: str = Field(max_length=200)
+    new_password: str = Field(min_length=8, max_length=72)
+
+
+@app.post("/api/password")
+def change_password(
+    data: PasswordChange,
+    session: Session = Depends(get_session),
+    condominium: Condominium = Depends(get_current_condominium),
+    _: str = Depends(require_admin),
+):
+    if not verify_password(data.current_password, condominium.password_hash):
+        raise HTTPException(400, "Senha atual incorreta")
+    try:
+        condominium.password_hash = hash_password(data.new_password)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc))
+    session.add(condominium)
+    session.commit()
+    audit("password_changed", condominium=condominium.slug)
     return {"ok": True}
 
 

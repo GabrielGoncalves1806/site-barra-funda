@@ -14,23 +14,14 @@ import getpass
 import re
 import sys
 
-import bcrypt
 from sqlmodel import Session, select
 
+from auth import hash_password
 from database import engine
 from models import Condominium, Domain
 from tenancy import normalize_host
 
 SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-MIN_PASSWORD_LENGTH = 8
-
-
-def _hash_password(password: str) -> str:
-    if len(password) < MIN_PASSWORD_LENGTH:
-        raise ValueError(f"A senha precisa ter pelo menos {MIN_PASSWORD_LENGTH} caracteres.")
-    if len(password.encode("utf-8")) > 72:
-        raise ValueError("Senha muito longa (máximo 72 bytes).")
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(rounds=12)).decode()
 
 
 def _get_condominium(session: Session, slug: str) -> Condominium:
@@ -45,7 +36,7 @@ def create_condominium(session: Session, slug: str, name: str, password: str) ->
         raise ValueError("Slug inválido: use letras minúsculas, números e hífens (ex.: barra-funda).")
     if session.exec(select(Condominium).where(Condominium.slug == slug)).first():
         raise ValueError(f"Já existe um condomínio com o slug '{slug}'.")
-    condominium = Condominium(slug=slug, name=name, password_hash=_hash_password(password))
+    condominium = Condominium(slug=slug, name=name, password_hash=hash_password(password))
     session.add(condominium)
     session.commit()
     session.refresh(condominium)
@@ -76,7 +67,7 @@ def remove_domain(session: Session, host: str) -> None:
 
 def set_password(session: Session, slug: str, password: str) -> None:
     condominium = _get_condominium(session, slug)
-    condominium.password_hash = _hash_password(password)
+    condominium.password_hash = hash_password(password)
     session.add(condominium)
     session.commit()
 

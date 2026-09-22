@@ -53,3 +53,19 @@ def test_apagar_registro_nao_apaga_imagem_de_outro_condominio(auth_client, auth_
     item_id = auth_client_b.post(f"/api/{resource}", json={**payload, "image": url}).json()["id"]
     assert auth_client_b.delete(f"/api/{resource}/{item_id}").status_code == 200
     assert _file(uploads, url).exists()
+
+
+PDF = b"%PDF-1.7\n%fake pdf body"
+
+
+def test_upload_aceita_pdf(auth_client, uploads):
+    res = auth_client.post("/api/upload", files={"file": ("regulamento.pdf", PDF, "application/pdf")})
+    assert res.status_code == 200, res.text
+    url = res.json()["url"]
+    assert url.startswith("/static/uploads/condo-a/") and url.endswith(".pdf")
+    assert _file(uploads, url).read_bytes() == PDF
+
+
+def test_upload_recusa_pdf_falso(auth_client, uploads):
+    res = auth_client.post("/api/upload", files={"file": ("virus.pdf", b"MZ\x90\x00", "application/pdf")})
+    assert res.status_code == 400

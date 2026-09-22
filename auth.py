@@ -5,6 +5,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+import bcrypt
 import jwt
 from fastapi import Cookie, Depends, HTTPException, Response
 
@@ -15,6 +16,24 @@ from tenancy import get_current_condominium
 COOKIE_NAME = "admin_session"
 JWT_ALGORITHM = "HS256"
 TOKEN_TTL_HOURS = 8
+MIN_PASSWORD_LENGTH = 8
+
+
+def hash_password(password: str) -> str:
+    """Valida o tamanho e devolve o hash bcrypt. Levanta ValueError se inválida."""
+    if len(password) < MIN_PASSWORD_LENGTH:
+        raise ValueError(f"A senha precisa ter pelo menos {MIN_PASSWORD_LENGTH} caracteres.")
+    if len(password.encode("utf-8")) > 72:
+        raise ValueError("Senha muito longa (máximo 72 bytes).")
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(rounds=12)).decode()
+
+
+def verify_password(password: str, password_hash: str) -> bool:
+    try:
+        return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
+    except (ValueError, TypeError):
+        # Hash inválido (ex.: "!" de condomínio sem senha definida) nunca bate.
+        return False
 
 
 def _secret_key() -> str:
