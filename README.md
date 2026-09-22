@@ -136,8 +136,6 @@ site-barra-funda/
 ├── alembic.ini
 ├── vercel.json             # Região da function (cle1, junto do Neon)
 ├── migrations/             # Alembic (env.py + versions/)
-├── scripts/
-│   └── deploy_vps.py       # ⚠️ desatualizado (ver abaixo)
 ├── tests/                  # pytest
 ├── templates/
 │   ├── base.html
@@ -212,16 +210,6 @@ BLOB_READ_WRITE_TOKEN=<criado ao conectar o Blob store ao projeto>
 
 Ordem pra subir uma versão com migração: `alembic upgrade head` apontando pro Neon de
 produção, **depois** o deploy.
-
-> O `Dockerfile` é do deploy antigo no Render e sai quando o Render for desligado.
-
-## Deploy em VPS
-
-> ⚠️ **Desatualizado.** `scripts/deploy_vps.py` é anterior ao multi-condomínio: ele ainda gera
-> `ADMIN_PASSWORD_HASH` e `ALLOWED_ORIGINS` (que não são mais usados) e não roda as migrações.
-> Não use sem revisar.
-
-`scripts/deploy_vps.py` faz o bootstrap numa VM Ubuntu 22.04 (systemd + Nginx + venv), com HTTPS via certbot, backup diário do SQLite, UFW e fail2ban. Detalhes no cabeçalho do script.
 
 ## Segurança
 
