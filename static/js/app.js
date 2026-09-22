@@ -26,27 +26,84 @@ document.querySelectorAll('[data-tab]').forEach(btn => {
 });
 
 // ===== BUSCA GLOBAL =====
-const SEARCH_MAP = [
-  { keywords: ["hospital", "hospitais", "emergencia"], tab: "contatos", target: "#contatos" },
-  { keywords: ["contato", "telefone", "ramal", "portaria"], tab: "contatos", target: "#contatos" },
+// Palavras-chave que valem pra qualquer condomínio levam direto pra aba.
+// Depois disso, FAQs e áreas são buscadas pelo texto real vindo da API — cada
+// condomínio ganha busca sem configurar nada. Aba desligada fica de fora.
+const TAB_KEYWORDS = [
+  { keywords: ["hospital", "hospitais", "emergencia", "contato", "telefone", "ramal", "portaria"], tab: "contatos", target: "#contatos" },
   { keywords: ["aviso", "documento", "regulamento", "atas"], tab: "documentos", target: "#documentos" },
   { keywords: ["venda", "produto", "anuncio"], tab: "vendas", target: "[data-sales-root]" },
   { keywords: ["novo", "cadastro", "morador"], tab: "novo-morador", target: "#novo-morador" },
-  { keywords: ["faq", "duvida", "pergunta", "regras"], tab: "faq", target: "#tab-faq .faq" },
-  { keywords: ["portaria", "entrega"], tab: "faq", target: "#faq-portaria" },
-  { keywords: ["aluguel", "temporada"], tab: "faq", target: "#faq-aluguel" },
-  { keywords: ["animal", "pet"], tab: "faq", target: "#faq-animais" },
-  { keywords: ["churrasqueira"], tab: "faq", target: "#faq-churrasqueira" },
-  { keywords: ["fumar", "cigarro"], tab: "faq", target: "#faq-fumar" },
-  { keywords: ["reclamacao", "sugestao"], tab: "faq", target: "#faq-reclamacao" },
-  { keywords: ["visitante", "visita"], tab: "faq", target: "#faq-visitantes" },
-  { keywords: ["area", "churrasqueira", "academia", "coworking", "espaco"], tab: "areas", target: "#tab-areas" }
+  { keywords: ["faq", "duvida", "pergunta", "regras"], tab: "faq", target: "#tab-faq .faq" }
 ];
+const AREA_KEYWORDS = ["area", "espaco", "lazer"];
+// Palavras comuns demais pra decidir qual FAQ o morador procura.
+const STOPWORDS = new Set(["que", "quero", "como", "para", "com", "uma", "uns", "dos", "das", "nos", "nas",
+  "onde", "qual", "quais", "pode", "posso", "fazer", "tem", "sobre", "meu", "minha", "seu", "sua", "por", "mais"]);
 
-function highlightAndScroll(selector) {
+let FAQS = [];
+let AREAS = [];
+
+function normalize(text) {
+  return String(text || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function tabExists(tab) {
+  return Boolean(document.getElementById(`tab-${tab}`));
+}
+
+function findSearchTarget(rawTerm) {
+  const term = normalize(rawTerm);
+  const words = term.split(/\s+/).filter(w => w.length >= 3 && !STOPWORDS.has(w));
+
+  const byKeyword = TAB_KEYWORDS.find(entry =>
+    tabExists(entry.tab) && entry.keywords.some(keyword => term.includes(keyword))
+  );
+  if (byKeyword) return byKeyword;
+
+  // Ordem: FAQ que bate na pergunta > área pelo nome > FAQ que só bate na
+  // resposta. Sem isso, "academia" caía numa FAQ que só cita academia.
+  const faqByQuestion = bestFaq(words, faq => faq.question);
+  if (faqByQuestion) return faqTarget(faqByQuestion);
+
+  if (tabExists("areas")) {
+    const area = AREAS.find(a => words.some(w => normalize(a.title).includes(w)));
+    if (area) return { tab: "areas", target: `[data-area-detail="${CSS.escape(area.slug)}"]` };
+  }
+
+  const faqByAnswer = bestFaq(words, faq => faq.answer);
+  if (faqByAnswer) return faqTarget(faqByAnswer);
+
+  if (tabExists("areas") && AREA_KEYWORDS.some(keyword => term.includes(keyword))) {
+    return { tab: "areas", target: "#tab-areas" };
+  }
+  return null;
+}
+
+function bestFaq(words, textOf) {
+  if (!tabExists("faq") || !words.length) return null;
+  let best = null;
+  let bestScore = 0;
+  FAQS.forEach(faq => {
+    const text = normalize(textOf(faq));
+    const score = words.filter(w => text.includes(w)).length;
+    if (score > bestScore) {
+      best = faq;
+      bestScore = score;
+    }
+  });
+  return best;
+}
+
+function faqTarget(faq) {
+  return { tab: "faq", target: `#faq-${faq.id}`, open: true };
+}
+
+function highlightAndScroll(selector, open) {
   if (!selector) return;
   const el = document.querySelector(selector);
   if (!el) return;
+  if (open && "open" in el) el.open = true;
   el.classList.add("search-hit");
   el.scrollIntoView({ behavior: "smooth", block: "center" });
   setTimeout(() => el.classList.remove("search-hit"), 1800);
@@ -58,16 +115,14 @@ const searchInput = document.querySelector("#siteSearchInput");
 if (searchForm && searchInput) {
   searchForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    const term = searchInput.value.trim().toLowerCase();
+    const term = searchInput.value.trim();
     if (!term) return;
 
-    const match = SEARCH_MAP.find(entry =>
-      entry.keywords.some(keyword => term.includes(keyword))
-    );
+    const match = findSearchTarget(term);
 
     if (match) {
       showTab(match.tab);
-      setTimeout(() => highlightAndScroll(match.target), 150);
+      setTimeout(() => highlightAndScroll(match.target, match.open), 150);
     } else {
       alert("Não encontrei resultados para sua busca. Tente palavras como 'hospital', 'avisos' ou 'vendas'.");
     }
@@ -149,6 +204,27 @@ function bindAreaCard(card) {
   });
 }
 
+function renderHomeAreas(areas) {
+  const root = document.querySelector('[data-home-areas-root]');
+  if (!root) return;
+  root.innerHTML = "";
+
+  areas.forEach(area => {
+    const button = document.createElement("button");
+    button.className = "area-card";
+    button.type = "button";
+    button.innerHTML = `
+      <span class="area-icon">${escapeHTML(area.icon)}</span>
+      <span class="area-name">${escapeHTML(area.title)}</span>
+    `;
+    button.addEventListener("click", () => {
+      showTab("areas");
+      openModal(area);
+    });
+    root.appendChild(button);
+  });
+}
+
 function renderAreaCards(areas) {
   const root = document.querySelector('[data-areas-root]');
   if (!root) return;
@@ -181,7 +257,9 @@ async function loadAreas() {
   try {
     const res = await fetch('/api/areas');
     const areas = await res.json();
+    AREAS = areas;
     renderAreaCards(areas);
+    renderHomeAreas(areas);
   } catch (err) {
     console.warn('Não foi possível carregar áreas:', err);
   }
@@ -201,7 +279,7 @@ function renderFAQs(faqs) {
 
   faqs.forEach(faq => {
     const details = document.createElement("details");
-    if (faq.anchor_id) details.id = faq.anchor_id;
+    details.id = `faq-${faq.id}`;
     details.innerHTML = `
       <summary>${escapeHTML(faq.icon)} ${escapeHTML(faq.question)}</summary>
       <p>${escapeHTML(faq.answer)}</p>
@@ -214,6 +292,7 @@ async function loadFAQs() {
   try {
     const res = await fetch('/api/faqs');
     const faqs = await res.json();
+    FAQS = faqs;
     renderFAQs(faqs);
   } catch (err) {
     console.warn('Não foi possível carregar FAQs:', err);

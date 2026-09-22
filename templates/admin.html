@@ -438,6 +438,12 @@
           </div>
           <div class="form-row">
             <div class="form-group">
+              <label>Ícone (emoji, aparece na Início)</label>
+              <input type="text" id="areaIcon" value="🏢" maxlength="10" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
               <label>Tag</label>
               <input type="text" id="areaTag" placeholder="Ex: Uso livre 24h" />
             </div>
@@ -881,6 +887,7 @@
       const payload = {
         title: document.getElementById('areaTitle').value,
         slug: document.getElementById('areaSlug').value,
+        icon: document.getElementById('areaIcon').value || '🏢',
         tag: document.getElementById('areaTag').value,
         image: imageInput.value,
         description: document.getElementById('areaDescription').value,
@@ -1017,6 +1024,7 @@
       editingAreaId = id;
       document.getElementById('areaTitle').value = area.title;
       document.getElementById('areaSlug').value = area.slug;
+      document.getElementById('areaIcon').value = area.icon || '🏢';
       document.getElementById('areaTag').value = area.tag;
       document.getElementById('areaDescription').value = area.description;
       document.getElementById('areaRules').value = fillLinesTextArea(area.rules);

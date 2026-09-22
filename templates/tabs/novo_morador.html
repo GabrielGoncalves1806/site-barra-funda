@@ -7,93 +7,35 @@
         <p>Siga estes passos para se integrar rapidamente à nossa comunidade.</p>
       </div>
 
-      <div class="grid-2">
+      {% for pair in config.onboarding | batch(2) %}
+      {% set row = loop %}
+      <div class="grid-2"{% if not row.first %} style="margin-top: 18px;"{% endif %}>
+        {% for step in pair %}
         <div class="panel">
-          <h3>1. Cadastro no Portal Winker/OMA</h3>
+          <h3>{{ row.index0 * 2 + loop.index }}. {{ step.title }}</h3>
+          {% if step.items %}
           <ul class="check">
-            <li>Instale o app "OMA Online" ou acesse o site.</li>
-            <li>Clique em "Quero me cadastrar" e digite seu e-mail.</li>
-            <li>Localize o condomínio: CEP 88095-001, Nº 366.</li>
-            <li>Confirme bloco, apartamento e nome completo.</li>
-            <li>Aguarde aprovação por e-mail.</li>
+            {% for item in step.items %}
+            <li>{{ item }}</li>
+            {% endfor %}
           </ul>
+          {% endif %}
+          {% if step.links %}
           <div class="service-links">
-            <a href="https://app.winker.com.br/intra" target="_blank" class="service-link">
-              <span class="service-icon">🌐</span>
-              <span>Acessar Site</span>
+            {% for link in step.links %}
+            <a href="{{ link.url }}" target="_blank" rel="noreferrer" class="service-link">
+              <span class="service-icon">{{ link.icon }}</span>
+              <span>{{ link.label }}</span>
             </a>
-            <a href="https://play.google.com/store/apps/details?id=br.com.winker.wl.oma&hl=pt_BR" target="_blank"
-              class="service-link">
-              <span class="service-icon">🤖</span>
-              <span>Android</span>
-            </a>
-            <a href="https://apps.apple.com/br/app/oma-online/id1625889108" target="_blank" class="service-link">
-              <span class="service-icon">🍎</span>
-              <span>iOS</span>
-            </a>
+            {% endfor %}
           </div>
+          {% endif %}
         </div>
-
-        <div class="panel">
-          <h3>2. Reconhecimento Facial</h3>
-          <ul class="check">
-            <li>Após cadastro no Winker, envie por e-mail:</li>
-            <li>Foto 3x4 (fundo branco, sem boné), RG e CPF.</li>
-            <li>Nome completo e nº da unidade (bloco + apto).</li>
-            <li>E-mails: everton.moraees@gmail.com ou jessica.voltane@oma.com.br</li>
-          </ul>
-        </div>
+        {% endfor %}
       </div>
-
-      <div class="grid-2" style="margin-top: 18px;">
-        <div class="panel">
-          <h3>3. Lavanderia Laundry Express</h3>
-          <ul class="check">
-            <li>Instale o app "Laundry Express".</li>
-            <li>Acesse laundryexpress.com.br e clique em "Cadastre-se".</li>
-            <li>Ative seu acesso com cartão/QR Code na lavanderia.</li>
-            <li>Use o app para reservar máquinas e pagar por uso.</li>
-          </ul>
-          <div class="service-links">
-            <a href="https://laundryexpress.com.br/#/login" target="_blank" class="service-link">
-              <span class="service-icon">🌐</span>
-              <span>Acessar Site</span>
-            </a>
-            <a href="https://play.google.com/store/apps/details?id=com.ideologica.laundryexpress&hl=pt_BR"
-              target="_blank" class="service-link">
-              <span class="service-icon">🤖</span>
-              <span>Android</span>
-            </a>
-            <a href="https://apps.apple.com/br/app/laundry-express/id1515742848" target="_blank"
-              class="service-link">
-              <span class="service-icon">🍎</span>
-              <span>iOS</span>
-            </a>
-          </div>
-        </div>
-
-        <div class="panel">
-          <h3>4. Portal Mercadinho</h3>
-          <ul class="check">
-            <li>Instale o app "New Market Place".</li>
-            <li>Faça pedidos de produtos e serviços.</li>
-            <li>Receba entregas diretamente no condomínio.</li>
-            <li>Aproveite ofertas exclusivas para moradores.</li>
-          </ul>
-          <div class="service-links">
-            <a href="https://play.google.com/store/apps/details?id=br.com.vertitecnologia.vmmarket.newmarketplace&hl=pt_BR"
-              target="_blank" class="service-link">
-              <span class="service-icon">🤖</span>
-              <span>Android</span>
-            </a>
-            <a href="https://apps.apple.com/br/app/new-market-place/id6740237420" target="_blank"
-              class="service-link">
-              <span class="service-icon">🍎</span>
-              <span>iOS</span>
-            </a>
-          </div>
-        </div>
-      </div>
+      {% else %}
+      <p class="muted">O guia do novo morador ainda não foi preenchido.</p>
+      {% endfor %}
     </div>
   </section>
 

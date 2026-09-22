@@ -101,6 +101,7 @@ class SaleUpdate(SQLModel):
 class AreaBase(SQLModel):
     title: str = Field(max_length=150)
     slug: str = Field(max_length=80)
+    icon: str = Field(default="🏢", max_length=10)
     tag: str = Field(default="", max_length=50)
     description: str = Field(default="", max_length=2000)
     image: str = Field(default="", max_length=500)
@@ -122,6 +123,7 @@ class AreaCreate(AreaBase):
 class AreaUpdate(SQLModel):
     title: Optional[str] = Field(default=None, max_length=150)
     slug: Optional[str] = Field(default=None, max_length=80)
+    icon: Optional[str] = Field(default=None, max_length=10)
     tag: Optional[str] = Field(default=None, max_length=50)
     description: Optional[str] = Field(default=None, max_length=2000)
     image: Optional[str] = Field(default=None, max_length=500)

@@ -2,10 +2,10 @@
 
 {% block content %}
   {% include "tabs/inicio.html" %}
-  {% include "tabs/areas.html" %}
-  {% include "tabs/documentos.html" %}
-  {% include "tabs/novo_morador.html" %}
-  {% include "tabs/contatos.html" %}
-  {% include "tabs/vendas.html" %}
-  {% include "tabs/faq.html" %}
+  {% if config.tabs.areas %}{% include "tabs/areas.html" %}{% endif %}
+  {% if config.tabs.documentos %}{% include "tabs/documentos.html" %}{% endif %}
+  {% if config.tabs.novo_morador %}{% include "tabs/novo_morador.html" %}{% endif %}
+  {% if config.tabs.contatos %}{% include "tabs/contatos.html" %}{% endif %}
+  {% if config.tabs.vendas %}{% include "tabs/vendas.html" %}{% endif %}
+  {% if config.tabs.faq %}{% include "tabs/faq.html" %}{% endif %}
 {% endblock %}

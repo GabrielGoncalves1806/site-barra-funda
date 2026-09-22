@@ -2,19 +2,22 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Any
 
 import bcrypt
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, Depends, HTTPException, UploadFile, File, Response
+from fastapi import FastAPI, Request, Depends, HTTPException, UploadFile, File, Response, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
+from pydantic import ValidationError
 from sqlmodel import Session, delete, func, select
 
 load_dotenv()
 
 from starlette.middleware.base import BaseHTTPMiddleware
 
+import condo_config
 from auth import (
     create_access_token,
     set_session_cookie,
@@ -63,6 +66,12 @@ app.add_middleware(SecurityHeadersMiddleware)
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+templates.env.filters.update(
+    whatsapp_url=condo_config.whatsapp_url,
+    tel_url=condo_config.tel_url,
+    hex_to_rgb=condo_config.hex_to_rgb,
+)
+templates.env.globals["maps_url"] = condo_config.maps_url
 
 
 @app.exception_handler(CondominiumNotFound)
@@ -73,14 +82,51 @@ async def condominium_not_found(request: Request, exc: CondominiumNotFound):
 
 
 # ── Páginas ──────────────────────────────────────────────
+def _page_context(condominium: Condominium) -> dict:
+    config = condo_config.load_config(condominium.config)
+    return {
+        "condominium": condominium,
+        "config": config,
+        "display_name": config.identity.name or condominium.name,
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 async def page_home(request: Request, condominium: Condominium = Depends(get_current_condominium)):
-    return templates.TemplateResponse(request, "index.html", {"condominium": condominium})
+    return templates.TemplateResponse(request, "index.html", _page_context(condominium))
 
 
 @app.get("/admin", response_class=HTMLResponse)
 async def page_admin(request: Request, condominium: Condominium = Depends(get_current_condominium)):
-    return templates.TemplateResponse(request, "admin.html", {"condominium": condominium})
+    return templates.TemplateResponse(request, "admin.html", _page_context(condominium))
+
+
+# ── API: Config do condomínio ────────────────────────────
+@app.get("/api/config")
+def get_config(condominium: Condominium = Depends(get_current_condominium)):
+    return condo_config.load_config(condominium.config).model_dump(mode="json")
+
+
+@app.put("/api/config/{section}")
+def update_config_section(
+    section: str,
+    value: Any = Body(...),
+    session: Session = Depends(get_session),
+    condominium: Condominium = Depends(get_current_condominium),
+    _: str = Depends(require_admin),
+):
+    if section not in condo_config.SECTIONS:
+        raise HTTPException(404, "Seção de configuração não encontrada")
+    try:
+        validated = condo_config.validate_section(section, value)
+    except ValidationError as exc:
+        raise HTTPException(422, exc.errors(include_url=False, include_context=False))
+    # Reatribui o dict inteiro: mutação in-place num campo JSON não é detectada.
+    condominium.config = {**(condominium.config or {}), section: validated}
+    session.add(condominium)
+    session.commit()
+    audit("config_updated", condominium=condominium.slug, section=section)
+    return validated
 
 
 # ── API: Avisos ──────────────────────────────────────────

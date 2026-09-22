@@ -4,19 +4,17 @@
     <div class="container">
       <div class="section__head">
         <h2>Áreas Comuns</h2>
-        <p>
-          Conheça os espaços de lazer e convivência do condomínio. Faça reservas pelo app Winker.
-        </p>
+        <p>{{ config.areas.intro }}</p>
       </div>
 
       <div class="cards" data-areas-root></div>
 
+      {% if config.areas.callout %}
       <div class="callout">
-        <div class="callout__title">Mercadinho</div>
-        <p>
-          O condomínio conta com um mercadinho de autoatendimento. Contato: (11) 99909-7730.
-        </p>
+        <div class="callout__title">{{ config.areas.callout.title }}</div>
+        <p>{{ config.areas.callout.text }}</p>
       </div>
+      {% endif %}
     </div>
   </section>
 
