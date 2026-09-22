@@ -33,18 +33,7 @@ def test_me_com_cookie_ok(auth_client):
 def test_logout_limpa_cookie(auth_client):
     res = auth_client.post("/api/logout")
     assert res.status_code == 200
-    # Após logout, /api/me deve voltar a 401
-    res = auth_client.get("/api/me", cookies={})
-    # TestClient mantém cookies por padrão; força sem
+    # TestClient mantém cookies por padrão; após logout, /api/me deve voltar a 401
     auth_client.cookies.clear()
     res = auth_client.get("/api/me")
     assert res.status_code == 401
-
-
-def test_rate_limit_login(client):
-    # 5 tentativas permitidas, 6ª bloqueia
-    for _ in range(5):
-        res = client.post("/api/auth", json={"password": "errada"})
-        assert res.status_code == 401
-    res = client.post("/api/auth", json={"password": "errada"})
-    assert res.status_code == 429

@@ -31,6 +31,14 @@ class Domain(SQLModel, table=True):
     condominium_id: int = Field(foreign_key="condominium.id", index=True)
 
 
+class LoginAttempt(SQLModel, table=True):
+    """Tentativa de login, pra limitar por IP. Fica no banco porque em
+    serverless cada instância teria o próprio contador em memória."""
+    id: Optional[int] = Field(default=None, primary_key=True)
+    ip: str = Field(max_length=64)
+    created_at: datetime = Field(index=True)
+
+
 # ── Notices ──────────────────────────────────────────────
 class NoticeBase(SQLModel):
     title: str = Field(max_length=200)

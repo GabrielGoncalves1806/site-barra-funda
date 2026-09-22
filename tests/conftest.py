@@ -13,6 +13,8 @@ os.environ["SECRET_KEY"] = "test-secret-key-only-for-tests-not-secure"
 os.environ["COOKIE_SECURE"] = "false"
 # Sem isso, o DATABASE_URL do .env (Neon) seria usado no startup do app
 os.environ["DATABASE_URL"] = "sqlite://"
+# Uploads vão pro disco nos testes, nunca pro Blob de verdade do .env
+os.environ["BLOB_READ_WRITE_TOKEN"] = ""
 
 import pytest
 from fastapi.testclient import TestClient
@@ -68,10 +70,6 @@ def app(engine):
             yield session
 
     main.app.dependency_overrides[get_session] = override_get_session
-
-    # Reset rate limiter entre testes
-    if hasattr(main.app.state, "limiter"):
-        main.app.state.limiter.reset()
 
     yield main.app
     main.app.dependency_overrides.clear()

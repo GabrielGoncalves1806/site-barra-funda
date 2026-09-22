@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-import uuid
 
 import bcrypt
 from dotenv import load_dotenv
@@ -10,14 +9,10 @@ from fastapi import FastAPI, Request, Depends, HTTPException, UploadFile, File, 
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
-from sqlmodel import Session, select
+from sqlmodel import Session, delete, func, select
 
 load_dotenv()
 
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
-from slowapi.util import get_remote_address
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from auth import (
@@ -28,11 +23,12 @@ from auth import (
 )
 from database import get_session
 from logging_config import setup_logging, audit
+from storage import get_storage
 from tenancy import CondominiumNotFound, get_current_condominium, get_owned
 
 setup_logging()
 from models import (
-    Condominium,
+    Condominium, LoginAttempt,
     Notice, NoticeCreate, NoticeUpdate,
     Sale, SaleCreate, SaleUpdate,
     Area, AreaCreate, AreaUpdate,
@@ -43,32 +39,14 @@ from models import (
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 TEMPLATES_DIR = BASE_DIR / "templates"
-UPLOAD_DIR = STATIC_DIR / "uploads"
 
-
-def ensure_upload_dir():
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # O schema do banco é responsabilidade do Alembic (`alembic upgrade head`),
-    # não do startup do app.
-    ensure_upload_dir()
-    yield
-
-
-app = FastAPI(title="Portal do Morador", lifespan=lifespan)
-
-# Rate limiter: chave por IP. Limite default cobre TODAS as rotas (inclusive
-# GETs públicos, que não tinham proteção nenhuma antes); /api/auth mantém o
-# limite mais restrito via decorator próprio.
-limiter = Limiter(key_func=get_remote_address, default_limits=["120/minute"])
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-app.add_middleware(SlowAPIMiddleware)
+# O schema do banco é responsabilidade do Alembic (`alembic upgrade head`),
+# não do startup do app.
+app = FastAPI(title="Portal do Morador")
 
 # Sem CORS: site e API de cada condomínio sempre ficam no mesmo domínio.
+# Sem rate limit global: em serverless cada instância contaria sozinha; abuso
+# nas rotas públicas fica com o firewall da Vercel. O login tem limite próprio.
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -178,9 +156,9 @@ def toggle_sale(sale_id: int, session: Session = Depends(get_session), condomini
 
 
 @app.delete("/api/sales/{sale_id}")
-def delete_sale(sale_id: int, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+def delete_sale(sale_id: int, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), storage=Depends(get_storage), _: str = Depends(require_admin)):
     sale = get_owned(session, Sale, sale_id, condominium, "Produto não encontrado")
-    remove_uploaded_file(sale.image)
+    storage.delete(sale.image, condominium.slug)
     session.delete(sale)
     session.commit()
     return {"ok": True}
@@ -214,9 +192,9 @@ def update_area(area_id: int, data: AreaUpdate, session: Session = Depends(get_s
 
 
 @app.delete("/api/areas/{area_id}")
-def delete_area(area_id: int, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), _: str = Depends(require_admin)):
+def delete_area(area_id: int, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium), storage=Depends(get_storage), _: str = Depends(require_admin)):
     area = get_owned(session, Area, area_id, condominium, "Área não encontrada")
-    remove_uploaded_file(area.image)
+    storage.delete(area.image, condominium.slug)
     session.delete(area)
     session.commit()
     return {"ok": True}
@@ -260,63 +238,68 @@ def delete_faq(faq_id: int, session: Session = Depends(get_session), condominium
 # ── Upload de arquivos ───────────────────────────────────
 ALLOWED_IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 ALLOWED_IMAGE_MIME = {"image/jpeg", "image/png", "image/webp", "image/gif"}
-MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
-
-
-def save_upload_file(upload: UploadFile) -> str:
-    ensure_upload_dir()
-    extension = Path(upload.filename or "").suffix.lower()
-
-    if extension not in ALLOWED_IMAGE_EXTS:
-        raise HTTPException(400, f"Extensão não permitida. Use: {', '.join(sorted(ALLOWED_IMAGE_EXTS))}")
-
-    if upload.content_type not in ALLOWED_IMAGE_MIME:
-        raise HTTPException(400, "Tipo de arquivo inválido (apenas imagens).")
-
-    filename = f"{uuid.uuid4().hex}{extension}"
-    destination = UPLOAD_DIR / filename
-
-    size = 0
-    with destination.open("wb") as buffer:
-        while chunk := upload.file.read(64 * 1024):
-            size += len(chunk)
-            if size > MAX_UPLOAD_SIZE_BYTES:
-                buffer.close()
-                destination.unlink(missing_ok=True)
-                raise HTTPException(413, f"Arquivo maior que {MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)} MB.")
-            buffer.write(chunk)
-
-    return f"/static/uploads/{filename}"
-
-
-def remove_uploaded_file(url: str | None):
-    if not url or not url.startswith("/static/uploads/"):
-        return
-    file_path = (BASE_DIR / url.lstrip("/")).resolve()
-    try:
-        file_path.relative_to(UPLOAD_DIR.resolve())
-    except ValueError:
-        return
-    try:
-        if file_path.exists():
-            file_path.unlink()
-    except OSError:
-        pass
+# A Vercel recusa request com corpo acima de 4,5 MB antes de chegar no app.
+MAX_UPLOAD_SIZE_BYTES = 4 * 1024 * 1024
 
 
 @app.post("/api/upload")
-async def upload_file(file: UploadFile = File(...), _: str = Depends(require_admin)):
-    if not file.filename:
-        raise HTTPException(400, "Arquivo inválido")
-    url = save_upload_file(file)
+async def upload_file(
+    file: UploadFile = File(...),
+    condominium: Condominium = Depends(get_current_condominium),
+    storage=Depends(get_storage),
+    _: str = Depends(require_admin),
+):
+    extension = Path(file.filename or "").suffix.lower()
+    if extension not in ALLOWED_IMAGE_EXTS:
+        raise HTTPException(400, f"Extensão não permitida. Use: {', '.join(sorted(ALLOWED_IMAGE_EXTS))}")
+    if file.content_type not in ALLOWED_IMAGE_MIME:
+        raise HTTPException(400, "Tipo de arquivo inválido (apenas imagens).")
+
+    data = await file.read(MAX_UPLOAD_SIZE_BYTES + 1)
+    if len(data) > MAX_UPLOAD_SIZE_BYTES:
+        raise HTTPException(413, f"Arquivo maior que {MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)} MB.")
+
+    url = storage.save(data, extension, file.content_type, condominium.slug)
     return {"url": url}
 
 
 # ── Auth (login + JWT em cookie httpOnly) ────────────────
+LOGIN_ATTEMPTS_PER_MINUTE = 5
+
+
+def get_client_ip(request: Request) -> str:
+    # Na Vercel o X-Forwarded-For é reescrito pela borda, então o primeiro IP
+    # é o do visitante. Fora dela, cai no IP da conexão.
+    forwarded = request.headers.get("x-forwarded-for", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def check_login_rate_limit(session: Session, ip: str) -> None:
+    """Máximo de LOGIN_ATTEMPTS_PER_MINUTE tentativas por IP por minuto.
+
+    Conta no banco porque em serverless cada instância teria o próprio
+    contador em memória. Tentativas com mais de 1h são apagadas aqui mesmo.
+    """
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    session.exec(delete(LoginAttempt).where(LoginAttempt.created_at < now - timedelta(hours=1)))
+    recent = session.exec(
+        select(func.count())
+        .select_from(LoginAttempt)
+        .where(LoginAttempt.ip == ip, LoginAttempt.created_at >= now - timedelta(minutes=1))
+    ).one()
+    if recent >= LOGIN_ATTEMPTS_PER_MINUTE:
+        session.commit()
+        raise HTTPException(429, "Muitas tentativas. Aguarde um minuto.")
+    session.add(LoginAttempt(ip=ip[:64], created_at=now))
+    session.commit()
+
+
 @app.post("/api/auth")
-@limiter.limit("5/minute")
-def auth_check(request: Request, request_body: dict, response: Response, condominium: Condominium = Depends(get_current_condominium)):
-    client_ip = request.client.host if request.client else "unknown"
+def auth_check(request: Request, request_body: dict, response: Response, session: Session = Depends(get_session), condominium: Condominium = Depends(get_current_condominium)):
+    client_ip = get_client_ip(request)
+    check_login_rate_limit(session, client_ip)
     password = request_body.get("password", "")
     if not isinstance(password, str):
         audit("login_failed", ip=client_ip, condominium=condominium.slug, reason="invalid_payload")
