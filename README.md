@@ -21,6 +21,27 @@ Portal web para moradores de condomínio, com painel administrativo para o sínd
 - Todos os dados (avisos, vendas, áreas, FAQs) têm `condominium_id`; leituras e escritas são sempre filtradas pelo condomínio do domínio.
 - A sessão do admin (JWT) vale só para o condomínio em que o login foi feito.
 - Condomínios, domínios e senhas são gerenciados pelo `manage.py` (super-admin, linha de comando).
+- O conteúdo de cada portal (nome, contatos, documentos, guia do novo morador, fotos, abas visíveis) fica no **config** do condomínio, no banco — nada de dado de condomínio no HTML nem no repo.
+
+## Config do condomínio
+
+Guardado em `condominium.config` (JSONB) e validado por `condo_config.py`. Seções:
+
+| Seção | Conteúdo |
+|---|---|
+| `identity` | nome exibido, subtítulo, logo (emoji), cores `accent`/`accent2` (`#rrggbb`) |
+| `address` | endereço e link do mapa (vazio = busca do endereço no Google Maps) |
+| `hero` | título, subtítulo e fotos do slider da Início |
+| `contacts` | rótulo, telefone, se é WhatsApp, e-mail |
+| `nearby` | serviços próximos (hospitais etc.) |
+| `documents` | ícone, título e URL (PDF no Blob ou link externo) |
+| `onboarding` | passos do novo morador: ícone, título, itens e botões com link (os 4 primeiros viram o resumo da Início) |
+| `areas` | texto de introdução e um aviso opcional (`callout`) |
+| `tabs` | liga/desliga de cada aba (a Início é sempre visível) |
+
+Todo campo tem valor padrão: condomínio novo já abre com estados vazios, e uma seção inválida no banco cai no padrão em vez de derrubar a página. URLs só aceitam `https://`, `http://` ou `/...` (bloqueia `javascript:`). Os telefones de emergência (190/192/193) são fixos no template.
+
+As áreas comuns continuam em tabela (`/api/areas`), com um `icon` que aparece na grade da Início.
 
 ## Setup local
 
@@ -109,6 +130,7 @@ site-barra-funda/
 ├── models.py               # Condominium, Domain, Notice, Sale, Area, FAQ
 ├── manage.py               # CLI de super-admin
 ├── storage.py              # Uploads: disco local ou Vercel Blob, separados por condomínio
+├── condo_config.py         # Schema e validação do config de cada condomínio
 ├── logging_config.py       # Setup de logging + audit log
 ├── seed.py                 # Condomínio de demonstração pra dev
 ├── alembic.ini
@@ -140,6 +162,7 @@ Todas as rotas respondem no contexto do condomínio do domínio acessado.
 | GET | `/api/sales` | Lista vendas |
 | GET | `/api/areas` | Lista áreas |
 | GET | `/api/faqs` | Lista FAQs |
+| GET | `/api/config` | Config do condomínio (com os padrões preenchidos) |
 
 ### Auth
 | Método | Rota | Descrição |
@@ -156,6 +179,7 @@ Todas as rotas respondem no contexto do condomínio do domínio acessado.
 | POST/PUT/DELETE | `/api/areas[/{id}]` | CRUD áreas |
 | POST/PUT/DELETE | `/api/faqs[/{id}]` | CRUD FAQs |
 | POST | `/api/upload` | Upload de imagem (4MB máx, jpg/png/webp/gif) |
+| PUT | `/api/config/{seção}` | Salva uma seção do config (as outras não mudam) |
 
 Registro de outro condomínio responde 404, igual a inexistente.
 

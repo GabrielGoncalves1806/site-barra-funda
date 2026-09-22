@@ -73,6 +73,15 @@ emergência (190/192/193) seguem fixos no template.
   link de WhatsApp montado só com dígitos.
 - Condomínio novo nasce com config padrão e estados vazios amigáveis.
 
+### Ajustes feitos na implementação da F3 (2026-09-22)
+
+- A grade de áreas da Início vem da tabela `area` (ganhou `icon`), não do config; clicar abre o modal da área.
+- Um formato único de endereço (`address.text`) no lugar dos quatro que existiam.
+- Saíram do portal: o documento "Manutenções e Certificados" (link `#` quebrado), o texto de
+  programador na Localização e a linha de fontes dos hospitais.
+- Busca: palavra-chave de aba > FAQ pela pergunta > área pelo nome > FAQ pela resposta.
+- A migração do conteúdo do Barra Funda foi um script avulso, fora do repo (tem dados pessoais).
+
 ## Infra
 
 - **Storage** (`storage.py`): disco local em dev/testes, Vercel Blob em produção
