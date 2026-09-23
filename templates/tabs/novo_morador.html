@@ -11,7 +11,7 @@
       {% set row = loop %}
       <div class="grid-2"{% if not row.first %} style="margin-top: 18px;"{% endif %}>
         {% for step in pair %}
-        <div class="panel">
+        <div class="panel" data-search="Novo morador" data-search-title="{{ step.title }}">
           <h3>{{ row.index0 * 2 + loop.index }}. {{ step.title }}</h3>
           {% if step.items %}
           <ul class="check">

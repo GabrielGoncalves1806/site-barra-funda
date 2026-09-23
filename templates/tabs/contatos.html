@@ -14,7 +14,7 @@
           <h3>Telefones e e-mails</h3>
           <div class="contact-list">
             {% for contact in config.contacts %}
-            <div class="contact">
+            <div class="contact" data-search="Contato" data-search-title="{{ contact.label }}">
               <div class="contact__k">{{ contact.label }}</div>
               {% if contact.phone and contact.whatsapp %}
               <a class="contact__v" href="{{ contact.phone | whatsapp_url }}" target="_blank" rel="noreferrer">{{ contact.phone }}</a>
@@ -26,7 +26,7 @@
               {% endif %}
             </div>
             {% endfor %}
-            <div class="contact">
+            <div class="contact" data-search="Contato" data-search-title="Emergência: SAMU, Bombeiros e Polícia">
               <div class="contact__k">SAMU / Bombeiros / Polícia</div>
               <div class="contact__v">
                 <a href="tel:192">192</a> / <a href="tel:193">193</a> / <a href="tel:190">190</a>
@@ -74,7 +74,7 @@
           <h3>Hospitais e emergências próximos</h3>
           <div class="hospital-cards">
             {% for place in config.nearby %}
-            {% if place.url %}<a class="hospital-card" target="_blank" rel="noreferrer" href="{{ place.url }}">{% else %}<div class="hospital-card">{% endif %}
+            {% if place.url %}<a class="hospital-card" data-search="Perto daqui" data-search-title="{{ place.name }}" target="_blank" rel="noreferrer" href="{{ place.url }}">{% else %}<div class="hospital-card" data-search="Perto daqui" data-search-title="{{ place.name }}">{% endif %}
               <div class="hospital-card__icon">{{ place.icon }}</div>
               <div>
                 <h4>{{ place.name }}</h4>

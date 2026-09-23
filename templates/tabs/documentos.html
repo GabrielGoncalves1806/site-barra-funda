@@ -7,7 +7,7 @@
 
       <div class="docs">
         {% for doc in config.documents %}
-        <a class="doc" href="{{ doc.url }}" target="_blank" rel="noreferrer">
+        <a class="doc" data-search="Documento" data-search-title="{{ doc.title }}" href="{{ doc.url }}" target="_blank" rel="noreferrer">
           <span class="doc__icon">{{ doc.icon }}</span>
           <span class="doc__title">{{ doc.title }}</span>
           <span class="doc__hint">{{ 'Visualizar ou baixar PDF' if doc.url.lower().split('?')[0].endswith('.pdf') else 'Abrir link' }}</span>

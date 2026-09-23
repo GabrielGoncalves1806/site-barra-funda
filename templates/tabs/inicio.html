@@ -28,11 +28,13 @@
           <div class="hero-search__field">
             <span class="hero-search__icon">🔎</span>
             <input id="siteSearchInput" type="text" name="search"
-              placeholder="O que você precisa? Ex: hospital, avisos, vendas" required />
+              placeholder="O que você precisa? Ex: mudança, churrasqueira, multa"
+              role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="searchResults" required />
             <button class="btn btn--primary" type="submit">Buscar</button>
+            <div class="search-results" id="searchResults" role="listbox" aria-label="Resultados da busca" hidden></div>
           </div>
-          <p class="hero-search__hint">Digite palavras-chave como "hospital", "documentos", "churrasqueira" ou "novo
-            morador".</p>
+          <p class="hero-search__hint">Digite o que procura e escolha na lista: as sugestões vêm das FAQs, áreas,
+            documentos, contatos e avisos do portal.</p>
         </form>
 
         {% if config.address.text %}

@@ -107,3 +107,22 @@ def test_todo_rodape_fica_dentro_de_uma_aba(client, session):
     parser = _FooterPlacement()
     parser.feed(client.get("/").text)
     assert parser.outside_tabs == 0
+
+
+# ── Busca: o que a página oferece pro índice ─────────────
+def test_conteudo_do_config_fica_pesquisavel(client, session):
+    _set_config(session, "condo-a", CONFIG)
+    page = client.get("/").text
+    for expected in [
+        'data-search="Contato" data-search-title="Portaria"',
+        'data-search="Documento" data-search-title="Regulamento"',
+        'data-search="Novo morador" data-search-title="Baixe o app"',
+        'data-search="Perto daqui" data-search-title="Hospital Central"',
+    ]:
+        assert expected in page, expected
+
+
+def test_home_tem_a_lista_de_sugestoes(client):
+    page = client.get("/").text
+    assert 'id="searchResults"' in page and 'role="listbox"' in page
+    assert 'type="module"' in page  # app.js importa o search.js

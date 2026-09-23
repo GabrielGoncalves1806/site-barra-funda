@@ -52,6 +52,14 @@ Sidebar em grupos — **Dia a dia** (avisos, vendas), **Conteúdo** (áreas, FAQ
 - Fotos são reduzidas no navegador (até 1600 px, JPEG) antes do upload; PDF sobe direto até 4 MB (maior que isso: link do Drive).
 - A tela aberta fica no `#hash` da URL, então recarregar não perde o lugar.
 
+## Busca do portal
+
+O campo da home sugere resultados enquanto o morador digita e, ao escolher, abre a aba e vai até o item (FAQ abre o `<details>`, área abre o modal, o resto rola e destaca).
+
+- O índice sai do DOM: todo elemento com `data-search-title` entra, e `data-search` vira a etiqueta do resultado ("FAQ", "Área", "Contato"...). Quem o Jinja renderiza ganha a marca no template; quem o JS renderiza ganha na função de render, que chama `refreshIndex()`. Conteúdo novo entra na busca sem configurar nada.
+- A pontuação (`rank`, em `static/js/search.js`) pesa título acima de corpo, começo de palavra acima de meio, e **palavra rara acima de palavra comum** — é o que faz "horário da academia" achar a Academia. Se algum item casa com a busca inteira, só ele aparece; senão vale o resultado parcial.
+- Desenho completo em `docs/superpowers/specs/2026-09-22-portal-search-design.md`.
+
 ## Estáticos e cache
 
 Os templates apontam CSS e JS pra `/static/v/<versão>/...` via `static_url('css/styles.css')`. A versão é um hash do conteúdo de `static/` (sem `uploads/`): mudou qualquer arquivo, muda a URL. Por isso a resposta vai com cache de um ano (`s-maxage` pra CDN da Vercel, `immutable` pro navegador). Os `import "./core.js"` do admin herdam a versão sozinhos.
@@ -133,7 +141,8 @@ Bancos criados antes do Alembic (pelo antigo `create_all`) não precisam de pass
 ## Rodar testes
 
 ```bash
-pytest -v
+pytest -v                            # backend
+node --test tests/js/search.test.mjs # pontuação da busca do portal
 ```
 
 ## Estrutura
@@ -164,7 +173,8 @@ site-barra-funda/
 │   └── tabs/...
 └── static/
     ├── css/styles.css
-    ├── js/app.js
+    ├── js/app.js           # portal (módulo ES)
+    ├── js/search.js        # índice + pontuação + sugestões da busca
     └── assets/
 ```
 
